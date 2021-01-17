@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+# client:
+#   image: ...
+#   ports:
+#     - "5000:5000"
+# server:
+#   image: ...
+#   ports:
+#     - "3000:3000"
+networks:
+    client:
+        driver: bridge
+    server:
+        driver: bridge
