@@ -1,4 +1,3 @@
-
 install:
 	pip3 install -r requirements.txt
 
@@ -8,3 +7,6 @@ test:
 lint:
 	mypy main
 	pylint main
+
+docker:
+	docker-compose up
