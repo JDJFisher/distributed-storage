@@ -1,12 +1,11 @@
-install:
-	pip3 install -r requirements.txt
+N=1
+
+run:
+	docker-compose up --scale server=$(N)
 
 test:
 	pytest
 
 lint:
-	mypy main
-	pylint main
-
-docker:
-	docker-compose up
+	# mypy client server
+	pylint client server
