@@ -2,10 +2,14 @@ version: '3.9'
 services:
     client:
         build: ./client
+        volumes: 
+            - ./client/src:/code/server
         networks:
             - client
     server:
         build: ./server
+        volumes: 
+            - ./server/src:/code/server
         networks:
             - server
 networks:
