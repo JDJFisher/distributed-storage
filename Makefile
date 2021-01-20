@@ -7,5 +7,8 @@ test:
 	pytest
 
 lint:
-	# mypy client server
-	pylint client server
+	mypy src/client src/server
+	pylint src/client src/server
+
+clean:
+	docker-compose rm -f
