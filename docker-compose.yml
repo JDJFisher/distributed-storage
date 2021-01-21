@@ -9,6 +9,7 @@ services:
             - ./src/common:/code/client/common
         networks:
             - client
+            - server
         depends_on: 
             - server
     server:
@@ -18,6 +19,8 @@ services:
         volumes: 
             - ./src/server:/code/server
             - ./src/common:/code/server/common
+        ports: 
+            - 50051:50051
         networks:
             - server
 networks:

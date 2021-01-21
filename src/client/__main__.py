@@ -20,7 +20,7 @@ class GreeterStub(object):
 
 
 def run():
-    with grpc.insecure_channel('localhost:50051') as channel:
+    with grpc.insecure_channel('server:50051') as channel:
         stub = GreeterStub(channel)
         response = stub.SayHello(HelloRequest(name='you'))
 
