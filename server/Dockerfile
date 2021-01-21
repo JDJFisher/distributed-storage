@@ -10,5 +10,7 @@ COPY requirements.txt .
 # install dependencies 
 RUN pip install -r requirements.txt
 
+EXPOSE 5000
+
 # command to run on container start
 CMD [ "python", "server" ]
