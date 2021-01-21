@@ -1,7 +1,6 @@
-N=1
 
 run:
-	docker-compose up --scale server=$(N)
+	docker-compose up
 
 test:
 	pytest
