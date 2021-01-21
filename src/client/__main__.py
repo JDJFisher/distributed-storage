@@ -3,30 +3,30 @@
 from __future__ import print_function
 
 # Third party
-# import grpc
+import grpc
 
 # Application
-# from helloworld_pb2 import HelloRequest, HelloReply
+from common.helloworld_pb2 import HelloRequest, HelloReply
 
 
-# class GreeterStub(object):
+class GreeterStub(object):
 
-#   def __init__(self, channel):
-#     self.SayHello = channel.unary_unary(
-#         '/helloworld.Greeter/SayHello',
-#         request_serializer=HelloRequest.SerializeToString,
-#         response_deserializer=HelloReply.FromString,
-#     )
+  def __init__(self, channel):
+    self.SayHello = channel.unary_unary(
+        '/helloworld.Greeter/SayHello',
+        request_serializer=HelloRequest.SerializeToString,
+        response_deserializer=HelloReply.FromString,
+    )
 
 
-# def run():
-#     with grpc.insecure_channel('localhost:50051') as channel:
-#         stub = GreeterStub(channel)
-#         response = stub.SayHello(HelloRequest(name='you'))
+def run():
+    with grpc.insecure_channel('localhost:50051') as channel:
+        stub = GreeterStub(channel)
+        response = stub.SayHello(HelloRequest(name='you'))
 
-#     print("Greeter client received: " + response.message)
+    print("Greeter client received: " + response.message)
 
 
 if __name__ == '__main__':
-    print("Hello world, client")
+    print('Hello world')
     # run()

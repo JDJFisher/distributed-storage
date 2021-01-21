@@ -6,6 +6,7 @@ services:
             dockerfile: Dockerfile.client
         volumes: 
             - ./src/client:/code/client
+            - ./src/common:/code/client/common
         networks:
             - client
         depends_on: 
@@ -16,6 +17,7 @@ services:
             dockerfile: Dockerfile.server
         volumes: 
             - ./src/server:/code/server
+            - ./src/common:/code/server/common
         networks:
             - server
 networks:
