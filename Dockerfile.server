@@ -10,8 +10,5 @@ COPY requirements.txt .
 # install dependencies 
 RUN pip install -r requirements.txt
 
-# copy the content of the server module to the working directory
-COPY ./src/server ./server
-
 # command to run on container start
 CMD [ "python", "server" ]
