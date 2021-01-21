@@ -23,14 +23,14 @@ if __name__ == '__main__':
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     add_GreeterServicer_to_server(Greeter(), server)
-    server.add_insecure_port('[::]:5000')
+    server.add_insecure_port('[::]:10000')
     server.start()
 
     logging.info('Waiting...')
     time.sleep(1)
     logging.info('Sending...')
 
-    with grpc.insecure_channel('localhost:5000') as channel:
+    with grpc.insecure_channel('localhost:10000') as channel:
         stub = GreeterStub(channel)
         response = stub.SayHello(HelloRequest(name='you'))
         logging.info("Received: " + response.message)

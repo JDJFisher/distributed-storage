@@ -3,14 +3,14 @@ run:
 	docker-compose up
 
 grpc:
-	python3 -m grpc_tools.protoc --python_out=src/server/ --grpc_python_out=src/server/ -I src/server/protos/ src/server/protos/*
+	python3 -m grpc_tools.protoc --python_out=server/server/ --grpc_python_out=server/server/ -I server/protos/ server/protos/*
 
 test:
 	pytest
 
 lint:
-	mypy src/client src/server
-	pylint src/client src/server
+	mypy client server
+	pylint client server
 
 clean:
 	docker-compose rm -f

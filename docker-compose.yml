@@ -1,24 +1,20 @@
 version: '3.9'
 services:
     client:
-        build:
-            context: .
-            dockerfile: Dockerfile.client
+        build: ./client
         volumes: 
-            - ./src/client:/code/client
+            - ./client/client:/code/client
         networks:
             - client
             - server
         depends_on: 
             - server
     server:
-        build:
-            context: .
-            dockerfile: Dockerfile.server
+        build: ./server
         volumes: 
-            - ./src/server:/code/server
+            - ./server/server:/code/server
         ports: 
-            - 5000-5001:5000
+            - 10000-11000:10000
         deploy:
             mode: replicated
             replicas: 2
