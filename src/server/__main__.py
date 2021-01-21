@@ -1,4 +1,7 @@
 
+# Standard library
+from concurrent import futures
+
 # Third party
 import grpc
 
@@ -32,7 +35,7 @@ def add_GreeterServicer_to_server(servicer, server):
 
 
 def serve():
-    server = grpc.server()
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     add_GreeterServicer_to_server(Greeter(), server)
     server.add_insecure_port('[::]:50051')
     server.start()
@@ -41,5 +44,5 @@ def serve():
 
 if __name__ == '__main__':
     print('Hello world')
-    # serve()
+    serve()
 
