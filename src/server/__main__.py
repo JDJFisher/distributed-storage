@@ -8,13 +8,13 @@ import sys
 import grpc
 
 # Application
-import helloworld_pb2
 from helloworld_pb2_grpc import GreeterStub, GreeterServicer, add_GreeterServicer_to_server
+from helloworld_pb2 import HelloReply, HelloRequest
 
 
 class Greeter(GreeterServicer):
     def SayHello(self, request, context):
-        return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
+        return HelloReply(message='Hello, %s!' % request.name)
 
 
 if __name__ == '__main__':
@@ -32,8 +32,8 @@ if __name__ == '__main__':
 
     with grpc.insecure_channel('localhost:5000') as channel:
         stub = GreeterStub(channel)
-        response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
-    logging.info("Received: " + response.message)
+        response = stub.SayHello(HelloRequest(name='you'))
+        logging.info("Received: " + response.message)
     
     server.wait_for_termination()
 
