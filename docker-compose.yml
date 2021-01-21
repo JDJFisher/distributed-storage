@@ -1,15 +1,26 @@
 version: '3.9'
 services:
     client:
-        build: ./client
+        build:
+            context: .
+            dockerfile: Dockerfile.client
         volumes: 
-            - ./client/src:/code/server
+            - ./src/client:/code/client
+            - ./src/common:/code/client/common
         networks:
             - client
+            - server
+        depends_on: 
+            - server
     server:
-        build: ./server
+        build:
+            context: .
+            dockerfile: Dockerfile.server
         volumes: 
-            - ./server/src:/code/server
+            - ./src/server:/code/server
+            - ./src/common:/code/server/common
+        ports: 
+            - 50051:50051
         networks:
             - server
 networks:
