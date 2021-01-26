@@ -28,6 +28,8 @@ services:
         networks:
             - internal
         # ports:
+        environment:
+            - docker=true
 
 networks:
     internal:

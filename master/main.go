@@ -29,4 +29,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to start serving the grpc server %v", err.Error())
 	}
+	defer grpcServer.GracefulStop()
 }
