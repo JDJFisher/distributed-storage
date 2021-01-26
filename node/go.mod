@@ -1,3 +1,3 @@
-module github.com/JDJFisher/primary-backup/node
+module github.com/JDJFisher/distributed-storage/node
 
 go 1.14

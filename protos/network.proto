@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "github.com/JDJFisher/distributed-storage/protos";
+
+message NetworkJoinRequest {
+    string serviceName = 1;
+}
+
+message NetworkJoinResponse {
+    enum NodeType {
+        HEAD = 0;
+        TAIL = 1;
+        NORMAL = 2;
+    }
+    NodeType type = 2;
+}
+
+service Network {
+    rpc JoinNetwork(NetworkJoinRequest) returns (NetworkJoinResponse);
+}
+
