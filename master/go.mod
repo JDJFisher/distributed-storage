@@ -1,4 +1,4 @@
-module github.com/JDJFisher/primary-backup/master
+module github.com/JDJFisher/distributed-storage/master
 
 go 1.14
 
