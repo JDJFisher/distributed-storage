@@ -2,34 +2,35 @@ version: '3.9'
 services:
     client:
         build: ./client
-        volumes:
-            - ./client/client:/code/client
-        networks:
-            - client
-            - server
-        depends_on:
-            - server
-    server:
-        build: ./server
-        volumes:
-            - ./server/server:/code/server
-        ports:
-            - 10000-11000:10000
-            - 5000-5500:5000
-        networks:
-            - server
         depends_on:
             - master
+        volumes:
+            - ./client/:/code/client
+        networks:
+            - external
 
     master:
         build: ./master
         volumes:
             - ./master/:/code/master
+        networks:
+            - internal
+            - external
         ports:
             - 6789:6789
 
+    node:
+        build: ./node
+        depends_on:
+            - master
+        volumes:
+            - ./node/:/code/node
+        networks:
+            - internal
+        # ports:
+
 networks:
-    client:
+    internal:
         driver: bridge
-    server:
+    external:
         driver: bridge

@@ -1,4 +1,4 @@
-# Primary-Backup
+# distributed-storage
 
 This repository implements chain replication, a technique for primary-backup object replication in distributed servers.
 
