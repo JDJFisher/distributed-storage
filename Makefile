@@ -1,4 +1,3 @@
-
 run:
 	docker-compose up
 
@@ -7,10 +6,6 @@ grpc:
 
 test:
 	pytest
-
-lint:
-	mypy client server
-	pylint client server
 
 clean:
 	docker-compose rm -f

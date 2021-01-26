@@ -1,16 +1,22 @@
-# set base image (host OS)
-FROM python:3.8
+# Using an alpine image because it removes all the bs in linux which makes the images so large
+# literally just a fresh install with only things needed for go to work
+FROM golang:1.14-alpine
 
-# set the working directory in the container
-WORKDIR /code
+RUN mkdir /app
 
-# copy the dependencies file to the working directory
-COPY requirements.txt .
+# Copy everything in here into the app directory
+ADD . /app
 
-# install dependencies 
-RUN pip install -r requirements.txt
+WORKDIR /app
 
-EXPOSE 5000
+# Download the depdencies of the project
+RUN go mod download
 
-# command to run on container start
-CMD [ "python", "server" ]
+# Build the go project into a binary
+RUN go build -o main .
+
+# Expose the GRPC port we'll be using
+EXPOSE 6789
+
+# Run the freshly build main executable
+CMD ["./main"]
