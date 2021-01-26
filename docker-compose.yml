@@ -16,11 +16,18 @@ services:
         ports:
             - 10000-11000:10000
             - 5000-5500:5000
-        deploy:
-            mode: replicated
-            replicas: 2
         networks:
             - server
+        depends_on:
+            - master
+
+    master:
+        build: ./master
+        volumes:
+            - ./master/:/code/master
+        ports:
+            - 6789:6789
+
 networks:
     client:
         driver: bridge
