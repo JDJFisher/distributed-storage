@@ -3,14 +3,17 @@ package network
 import (
 	"context"
 	"log"
+
+	"github.com/JDJFisher/distributed-storage/protos"
 )
 
 // Implement the interface of the grpc server
-type NetServer struct {
-	UnimplementedNetworkServer
+
+type NetworkServer struct {
+	protos.UnimplementedNetworkServer
 }
 
-func (server *NetServer) SayHello(ctx context.Context, message *Message) (*Message, error) {
-	log.Printf("Received message from client: %s", message.Body)
-	return &Message{Body: "Hello from the master!"}, nil
+func (s *NetworkServer) JoinNetwork(ctx context.Context, req *protos.NetworkJoinRequest) (*protos.NetworkJoinResponse, error) {
+	log.Println("Received a network join request")
+	return &protos.NetworkJoinResponse{Type: protos.NetworkJoinResponse_NORMAL}, nil
 }
