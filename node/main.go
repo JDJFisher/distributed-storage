@@ -3,14 +3,24 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/JDJFisher/distributed-storage/protos"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	// Different grpc connection info depending on if it's running in docker or not
+	grpcHost := ""
+	isDocker := os.Getenv("docker")
+	if len(isDocker) == 0 {
+		grpcHost = ":6789"
+	} else {
+		grpcHost = "master:6789"
+	}
+
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial("master:6789", grpc.WithInsecure())
+	conn, err := grpc.Dial(grpcHost, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to the master - %v", err.Error())
 	}

@@ -8,6 +8,8 @@ services:
             - ./client/:/code/client
         networks:
             - external
+        environment:
+            - docker=true
 
     master:
         build: ./master
@@ -28,6 +30,8 @@ services:
         networks:
             - internal
         # ports:
+        environment:
+            - docker=true
 
 networks:
     internal:
