@@ -1,4 +1,4 @@
-package network
+package servers
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"github.com/JDJFisher/distributed-storage/protos"
 )
 
+// NetworkServer ...
 type NetworkServer struct {
 	protos.UnimplementedNetworkServer
 	CandidateNodes []*CandidateNode
@@ -17,3 +18,9 @@ func (s *NetworkServer) RequestJoin(ctx context.Context, req *protos.RequestJoin
 
 	return &protos.RequestJoinResponse{Ok: true}, nil
 }
+
+// // JoinNetwork ...
+// func (s *NetworkServer) JoinNetwork(ctx context.Context, req *protos.) (*protos.NetworkJoinResponse, error) {
+// 	log.Println("Received a network join request")
+// 	return &protos.NetworkJoinResponse{Type: protos.NetworkJoinResponse_NORMAL}, nil
+// }

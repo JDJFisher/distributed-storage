@@ -10,6 +10,8 @@ services:
             - .:/code
         networks:
             - external
+        environment:
+            - docker=true
 
     master:
         build:
