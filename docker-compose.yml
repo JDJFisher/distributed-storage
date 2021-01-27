@@ -1,18 +1,22 @@
 version: '3.9'
 services:
     client:
-        build: ./client
+        build:
+            context: .
+            dockerfile: ./client/Dockerfile
         depends_on:
             - master
         volumes:
-            - ./client/:/code/client
+            - .:/code
         networks:
             - external
 
     master:
-        build: ./master
+        build:
+            context: .
+            dockerfile: ./master/Dockerfile
         volumes:
-            - ./master/:/code/master
+            - .:/code
         networks:
             - internal
             - external
@@ -20,16 +24,18 @@ services:
             - 6789:6789
 
     node:
-        build: ./node
+        build:
+            context: .
+            dockerfile: ./node/Dockerfile
         depends_on:
             - master
         volumes:
-            - ./node/:/code/node
+            - .:/code
         networks:
             - internal
-        # ports:
         environment:
             - docker=true
+            - serviceName=node-1
 
 networks:
     internal:

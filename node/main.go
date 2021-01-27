@@ -28,10 +28,10 @@ func main() {
 
 	networkClient := protos.NewNetworkClient(conn)
 
-	response, err := networkClient.JoinNetwork(context.Background(), &protos.NetworkJoinRequest{ServiceName: "server-x"})
+	response, err := networkClient.RequestJoin(context.Background(), &protos.RequestJoinRequest{ServiceName: "node-1"})
 	if err != nil {
 		log.Fatalf("Error joining the chain network - %v", err.Error())
 	}
 
-	log.Printf("Response from master: \n %s", response.Type)
+	log.Printf("Response from master: \n %v", response.Ok)
 }
