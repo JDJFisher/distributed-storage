@@ -28,7 +28,7 @@ func main() {
 
 	storageClient := protos.NewStorageClient(conn)
 
-	response, err := storageClient.Read(context.Background(), &protos.ReadRequest{Message: "foo"})
+	response, err := storageClient.Read(context.Background(), &protos.ReadRequest{})
 	if err != nil {
 		log.Fatalf("Error reading from master - %v", err.Error())
 	}

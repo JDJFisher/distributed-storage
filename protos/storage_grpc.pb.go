@@ -32,7 +32,7 @@ func NewStorageClient(cc grpc.ClientConnInterface) StorageClient {
 
 func (c *storageClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ReadResponse, error) {
 	out := new(ReadResponse)
-	err := c.cc.Invoke(ctx, "/Storage/Read", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Storage/read", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (c *storageClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.
 
 func (c *storageClient) Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*WriteResponse, error) {
 	out := new(WriteResponse)
-	err := c.cc.Invoke(ctx, "/Storage/Write", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Storage/write", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func _Storage_Read_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Storage/Read",
+		FullMethod: "/Storage/read",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StorageServer).Read(ctx, req.(*ReadRequest))
@@ -108,7 +108,7 @@ func _Storage_Write_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Storage/Write",
+		FullMethod: "/Storage/write",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StorageServer).Write(ctx, req.(*WriteRequest))
@@ -124,11 +124,11 @@ var Storage_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*StorageServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Read",
+			MethodName: "read",
 			Handler:    _Storage_Read_Handler,
 		},
 		{
-			MethodName: "Write",
+			MethodName: "write",
 			Handler:    _Storage_Write_Handler,
 		},
 	},

@@ -1,25 +1,28 @@
 syntax = "proto3";
-
 option go_package = "github.com/JDJFisher/distributed-storage/protos";
+import "google/protobuf/struct.proto";
+
+// TODO: Use a larger type than int32
 
 message ReadRequest {
-  string message = 1;
+  int32 id = 1;
 }
 
 message WriteRequest {
-  string message = 1;
+  int32 id = 1;
+  google.protobuf.Struct value = 2;
 }
 
 message ReadResponse {
-  string message = 1;
+  google.protobuf.Struct value = 1;
 }
 
 message WriteResponse {
-  string message = 1;
+  google.protobuf.Struct value = 1;
 }
 
 service Storage {
-    rpc Read(ReadRequest) returns (ReadResponse);
-    rpc Write(WriteRequest) returns (WriteResponse);
+    rpc read(ReadRequest) returns (ReadResponse);
+    rpc write(WriteRequest) returns (WriteResponse);
 }
 
