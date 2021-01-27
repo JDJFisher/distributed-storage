@@ -10,7 +10,7 @@ import (
 
 func main() {
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(":6789", grpc.WithInsecure())
+	conn, err := grpc.Dial("master:6789", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to the master - %v", err.Error())
 	}

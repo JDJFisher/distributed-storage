@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "github.com/JDJFisher/distributed-storage/protos";
+
+message ReadRequest {
+  string message = 1;
+}
+
+message WriteRequest {
+  string message = 1;
+}
+
+message ReadResponse {
+  string message = 1;
+}
+
+message WriteResponse {
+  string message = 1;
+}
+
+service Storage {
+    rpc Read(ReadRequest) returns (ReadResponse);
+    rpc Write(WriteRequest) returns (WriteResponse);
+}
+
