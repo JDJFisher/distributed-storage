@@ -29,7 +29,8 @@ services:
             - ./node/:/code/node
         networks:
             - internal
-        # ports:
+        ports:
+            - 5000:5000
         environment:
             - docker=true
 

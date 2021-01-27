@@ -16,7 +16,7 @@ func main() {
 		log.Fatalf("Failed to open tcp listener... %v", err.Error())
 	}
 
-	// Create the new GRPC server
+	// Create a GRPC server
 	grpcServer := grpc.NewServer()
 
 	// Register Network service
