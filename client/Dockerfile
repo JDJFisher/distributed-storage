@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine
+FROM golang:1.15-alpine
 
 RUN mkdir /app
 
@@ -6,6 +6,9 @@ RUN mkdir /app
 ADD . /app
 
 WORKDIR /app
+
+# Download the depdencies of the project
+RUN go mod download
 
 # Build the go project into a binary
 RUN go build -o main .

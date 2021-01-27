@@ -1,4 +1,4 @@
-package network
+package servers
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/JDJFisher/distributed-storage/protos"
 )
 
-// Implement the interface of the grpc server
+// Network server
 
 type NetworkServer struct {
 	protos.UnimplementedNetworkServer

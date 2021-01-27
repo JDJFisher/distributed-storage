@@ -1,6 +1,6 @@
 # Using an alpine image because it removes all the bs in linux which makes the images so large
 # literally just a fresh install with only things needed for go to work
-FROM golang:1.14-alpine
+FROM golang:1.15-alpine
 
 RUN mkdir /app
 
