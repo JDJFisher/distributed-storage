@@ -50,7 +50,7 @@ func fake(storageClient protos.StorageClient) {
 	// Loop over dummy requests
 	for i, line := range lines[1:] {
 		// Wait ...
-		time.Sleep(5000)
+		time.Sleep(5 * time.Second)
 
 		// Determine request type
 		requestType := "R"
