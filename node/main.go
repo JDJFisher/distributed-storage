@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/JDJFisher/distributed-storage/node/servers"
 	"github.com/JDJFisher/distributed-storage/protos"
@@ -18,6 +19,7 @@ func main() {
 		grpcHost = "master" + grpcHost
 	}
 
+	// Create GRPC client
 	var conn *grpc.ClientConn
 	conn, err := grpc.Dial(grpcHost, grpc.WithInsecure())
 	if err != nil {
@@ -25,16 +27,24 @@ func main() {
 	}
 	defer conn.Close()
 
-	networkClient := protos.NewNetworkClient(conn)
+	// Create Chain client
+	chainClient := protos.NewChainClient(conn)
 
-	response, err := networkClient.RequestJoin(context.Background(), &protos.RequestJoinRequest{ServiceName: "node-1"})
-	if err != nil {
-		log.Fatalf("Error joining the chain network - %v", err.Error())
+	// Repetitively attempt to join the chain
+	for {
+		_, err := chainClient.Register(context.Background(), &protos.RegisterRequest{ServiceName: "node-1"})
+		if err != nil {
+			log.Fatalf("Error joining the chain network - %v", err.Error())
+			time.Sleep(5000)
+		} else {
+			log.Println("Accepted into the chain")
+			break
+		}
 	}
 
-	log.Printf("Response from master: \n %s", response.Type)
+	// TODO: Wait until assigned a role in the chain
 
-	// TODO: Only serve once accepted in to the chain
+	// Serve
 	serve()
 }
 

@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"log"
 	"os"
+	"time"
 
 	"github.com/JDJFisher/distributed-storage/protos"
 	"google.golang.org/grpc"
@@ -42,9 +43,7 @@ func main() {
 
 	// Loop over dummy requests
 	for i, line := range lines[1:] {
-
-		// TODO: Sleep for a few seconds
-
+		time.Sleep(5000)
 		log.Println("Dispatching request", i, ":", line)
 
 		// TODO: Execute a Write if line has a value value otherwise do a read

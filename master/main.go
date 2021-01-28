@@ -19,16 +19,16 @@ func main() {
 	// Create a GRPC server
 	grpcServer := grpc.NewServer()
 
-	// Register Network service
-	networkServer := servers.NetworkServer{}
-	protos.RegisterNetworkServer(grpcServer, &networkServer)
+	// Register Chain service
+	chainServer := servers.ChainServer{}
+	protos.RegisterChainServer(grpcServer, &chainServer)
 
 	// Register storage service
 	storageServer := servers.StorageServer{}
 	protos.RegisterStorageServer(grpcServer, &storageServer)
 
 	// Start serving GRPC requests on the open tcp connection
-	log.Println("[MASTER] Starting master.... GRPC serving on port: 6789")
+	log.Println("Starting master")
 	err = grpcServer.Serve(listen)
 	if err != nil {
 		log.Fatalf("Failed to start serving the grpc server %v", err.Error())
