@@ -24,6 +24,8 @@ services:
             - external
         ports:
             - 6789:6789
+        environment:
+            - docker=true
 
     node:
         build:
@@ -35,6 +37,8 @@ services:
             - .:/code
         networks:
             - internal
+        ports:
+            - 5000:5000
         environment:
             - docker=true
             - serviceName=node-1

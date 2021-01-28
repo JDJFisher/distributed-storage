@@ -3,6 +3,7 @@ package servers
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/JDJFisher/distributed-storage/protos"
 	"google.golang.org/grpc"
@@ -16,9 +17,15 @@ type StorageServer struct {
 func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*protos.ReadResponse, error) {
 	log.Println("Received a read request")
 
+	// Different grpc connection info depending on if it's running in docker or not
+	grpcHost := ":5000"
+	if os.Getenv("docker") == "true" {
+		grpcHost = "node-1" + grpcHost // TODO: Fetch host from the chain
+	}
+
 	// Open a connection to the tail node
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(":5000", grpc.WithInsecure()) // TODO: Fetch host from the chain
+	conn, err := grpc.Dial(grpcHost, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to the tail node - %v", err.Error())
 	}
@@ -39,9 +46,15 @@ func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*pro
 func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*protos.WriteResponse, error) {
 	log.Println("Received a write request")
 
+	// Different grpc connection info depending on if it's running in docker or not
+	grpcHost := ":5000"
+	if os.Getenv("docker") == "true" {
+		grpcHost = "node-1" + grpcHost // TODO: Fetch host from the chain
+	}
+
 	// Open a connection to the head node
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(":5000", grpc.WithInsecure()) // TODO: Fetch host from the chain
+	conn, err := grpc.Dial(grpcHost, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to the head node - %v", err.Error())
 	}
