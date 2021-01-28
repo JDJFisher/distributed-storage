@@ -1,22 +1,25 @@
 # Using an alpine image because it removes all the bs in linux which makes the images so large
 # literally just a fresh install with only things needed for go to work
-FROM golang:1.15-alpine
+FROM golang:1.15-alpine as build
+RUN apk add git
 
 RUN mkdir /app
+WORKDIR /app
 
-# Copy everything in here into the app directory
-ADD . /app
+COPY go.mod .
+COPY go.sum .
+COPY protos .
 
-WORKDIR /app/master
+#Using this command speeds up the actual build process by a lot compared to using "go mod download"
+RUN go mod graph | awk '{if ($1 !~ "@") print $2}' | xargs go get
+# RUN go mod download
+COPY . .
 
-# Download the depdencies of the project
-RUN go mod download
+RUN go build ./master/main.go
 
-# # Build the go project into a binary
-RUN go build main.go
-
-# Expose the GRPC port we'll be using
+# <- Second step to build minimal image
+FROM golang:1.15-alpine
+COPY --from=build /app/main main
 EXPOSE 6789
-
-# #Run the freshly build main executable
+RUN ["chmod", "+x", "./main"]
 CMD ["./main"]
