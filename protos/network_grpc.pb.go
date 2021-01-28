@@ -18,7 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NetworkClient interface {
-	JoinNetwork(ctx context.Context, in *NetworkJoinRequest, opts ...grpc.CallOption) (*NetworkJoinResponse, error)
+	//Node->Master - Requesting to join the network
+	RequestJoin(ctx context.Context, in *RequestJoinRequest, opts ...grpc.CallOption) (*RequestJoinResponse, error)
 }
 
 type networkClient struct {
@@ -29,9 +30,9 @@ func NewNetworkClient(cc grpc.ClientConnInterface) NetworkClient {
 	return &networkClient{cc}
 }
 
-func (c *networkClient) JoinNetwork(ctx context.Context, in *NetworkJoinRequest, opts ...grpc.CallOption) (*NetworkJoinResponse, error) {
-	out := new(NetworkJoinResponse)
-	err := c.cc.Invoke(ctx, "/Network/JoinNetwork", in, out, opts...)
+func (c *networkClient) RequestJoin(ctx context.Context, in *RequestJoinRequest, opts ...grpc.CallOption) (*RequestJoinResponse, error) {
+	out := new(RequestJoinResponse)
+	err := c.cc.Invoke(ctx, "/Network/RequestJoin", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +43,8 @@ func (c *networkClient) JoinNetwork(ctx context.Context, in *NetworkJoinRequest,
 // All implementations must embed UnimplementedNetworkServer
 // for forward compatibility
 type NetworkServer interface {
-	JoinNetwork(context.Context, *NetworkJoinRequest) (*NetworkJoinResponse, error)
+	//Node->Master - Requesting to join the network
+	RequestJoin(context.Context, *RequestJoinRequest) (*RequestJoinResponse, error)
 	mustEmbedUnimplementedNetworkServer()
 }
 
@@ -50,8 +52,8 @@ type NetworkServer interface {
 type UnimplementedNetworkServer struct {
 }
 
-func (UnimplementedNetworkServer) JoinNetwork(context.Context, *NetworkJoinRequest) (*NetworkJoinResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method JoinNetwork not implemented")
+func (UnimplementedNetworkServer) RequestJoin(context.Context, *RequestJoinRequest) (*RequestJoinResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RequestJoin not implemented")
 }
 func (UnimplementedNetworkServer) mustEmbedUnimplementedNetworkServer() {}
 
@@ -66,20 +68,20 @@ func RegisterNetworkServer(s grpc.ServiceRegistrar, srv NetworkServer) {
 	s.RegisterService(&Network_ServiceDesc, srv)
 }
 
-func _Network_JoinNetwork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NetworkJoinRequest)
+func _Network_RequestJoin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestJoinRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NetworkServer).JoinNetwork(ctx, in)
+		return srv.(NetworkServer).RequestJoin(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Network/JoinNetwork",
+		FullMethod: "/Network/RequestJoin",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NetworkServer).JoinNetwork(ctx, req.(*NetworkJoinRequest))
+		return srv.(NetworkServer).RequestJoin(ctx, req.(*RequestJoinRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -92,8 +94,8 @@ var Network_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*NetworkServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "JoinNetwork",
-			Handler:    _Network_JoinNetwork_Handler,
+			MethodName: "RequestJoin",
+			Handler:    _Network_RequestJoin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

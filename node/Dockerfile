@@ -7,16 +7,16 @@ RUN mkdir /app
 # Copy everything in here into the app directory
 ADD . /app
 
-WORKDIR /app
+WORKDIR /app/node
 
 # Download the depdencies of the project
 RUN go mod download
 
-# Build the go project into a binary
-RUN go build -o main .
+# # Build the go project into a binary
+RUN go build main.go
 
 # Expose the GRPC port we'll be using
 EXPOSE 6789
 
-# Run the freshly build main executable
+# #Run the freshly build main executable
 CMD ["./main"]
