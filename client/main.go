@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":6789"
+	grpcHost := ":6000"
 	if os.Getenv("docker") == "true" {
 		grpcHost = "master" + grpcHost
 	}

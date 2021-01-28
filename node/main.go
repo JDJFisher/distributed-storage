@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/JDJFisher/distributed-storage/node/servers"
@@ -13,15 +14,21 @@ import (
 )
 
 func main() {
+	// Determine port number
+	port, err := strconv.Atoi(os.Getenv("port"))
+	if err != nil {
+		port = 7000
+	}
+
 	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":6789"
+	grpcHost := ":6000"
 	if os.Getenv("docker") == "true" {
 		grpcHost = "master" + grpcHost
 	}
 
 	// Create GRPC client
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(grpcHost, grpc.WithInsecure())
+	conn, err = grpc.Dial(grpcHost, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to the master - %v", err.Error())
 	}
@@ -44,12 +51,12 @@ func main() {
 
 	// TODO: Wait until assigned a role in the chain
 
-	// serve()
+	serve(port)
 }
 
-func serve() {
+func serve(port int) {
 	// Create a TCP connection for the GRPC server
-	listen, err := net.Listen("tcp", os.Getenv("address"))
+	listen, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		log.Fatalf("Failed to open tcp listener... %v", err.Error())
 	}

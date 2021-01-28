@@ -23,7 +23,7 @@ services:
             - internal
             - external
         ports:
-            - 6789:6789
+            - 6000:6000
         environment:
             - docker=true
 
@@ -38,10 +38,11 @@ services:
         networks:
             - internal
         ports:
-            - 5000:5000
+            - 7000:7000
         environment:
             - docker=true
-            - address="node-1:5000"
+            - port=7000
+            - address="node-1:7000"
 
     node-2:
         build:
@@ -54,10 +55,11 @@ services:
         networks:
             - internal
         ports:
-            - 5001:5001
+            - 7001:7001
         environment:
             - docker=true
-            - address="node-2:5001"
+            - port=7001
+            - address="node-2:7001"
 
 networks:
     internal:

@@ -10,7 +10,7 @@ import (
 )
 
 type CandidateNode struct {
-	name string
+	address string
 }
 
 // ChainServer ...
@@ -24,10 +24,10 @@ func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest)
 	p, _ := peer.FromContext(ctx)
 	addr := p.Addr.String()
 
-	newCandidateNode := &CandidateNode{name: addr}
+	newCandidateNode := &CandidateNode{address: req.Address}
 	s.CandidateNodes = append(s.CandidateNodes, newCandidateNode)
 
-	log.Printf("Added %v to candidates", addr)
+	log.Printf("Added %v (%v) to candidates", req.Address, addr)
 
 	return &protos.RegisterResponse{}, nil
 }

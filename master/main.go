@@ -10,8 +10,8 @@ import (
 )
 
 func main() {
-	// Create a TCP connection on port 6789 for the GRPC server
-	listen, err := net.Listen("tcp", ":6789")
+	// Create a TCP connection on port 6000 for the GRPC server
+	listen, err := net.Listen("tcp", ":6000")
 	if err != nil {
 		log.Fatalf("Failed to open tcp listener... %v", err.Error())
 	}
