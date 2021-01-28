@@ -2,7 +2,7 @@ package servers
 
 import (
 	"context"
-	"log"
+	// "log"
 
 	"github.com/JDJFisher/distributed-storage/protos"
 )
@@ -13,11 +13,11 @@ type StorageServer struct {
 }
 
 func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*protos.ReadResponse, error) {
-	log.Println("Foo")
+	// log.Println("Foo")
 	return &protos.ReadResponse{}, nil
 }
 
 func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*protos.WriteResponse, error) {
-	log.Println("Bar")
+	// log.Println("Bar")
 	return &protos.WriteResponse{}, nil
 }

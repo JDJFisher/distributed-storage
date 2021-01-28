@@ -49,25 +49,29 @@ func fake(storageClient protos.StorageClient) {
 
 	// Loop over dummy requests
 	for i, line := range lines[1:] {
+		// Wait ...
 		time.Sleep(5000)
-		log.Println("Dispatching request", i, ":", line)
 
-		if line[1] == "" {
+		// Determine request type
+		requestType := "R"
+		if line[1] != "" {
+			requestType = "W"
+		}
+
+		log.Printf("Dispatching request %v: %v-%v", i, requestType, line[0])
+
+		if requestType == "R" {
 			// Fake a read
-			response, err := storageClient.Read(context.Background(), &protos.ReadRequest{})
-			if err != nil {
-				log.Fatalln("Error reading", err.Error())
-			} else {
-				log.Println("Read Response", response)
-			}
+			_, err = storageClient.Read(context.Background(), &protos.ReadRequest{})
 		} else {
 			// Fake a write
-			response, err := storageClient.Write(context.Background(), &protos.WriteRequest{})
-			if err != nil {
-				log.Fatalln("Error writing", err.Error())
-			} else {
-				log.Println("Read Response", response)
-			}
+			_, err = storageClient.Write(context.Background(), &protos.WriteRequest{})
+		}
+
+		if err != nil {
+			log.Fatalf("Failed request %v: %v", i, err.Error())
+		} else {
+			log.Printf("Recieved response %v: ...", i)
 		}
 	}
 }
