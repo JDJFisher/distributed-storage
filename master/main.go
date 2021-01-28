@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net"
+	"strconv"
 
 	"github.com/JDJFisher/distributed-storage/master/servers"
 	"github.com/JDJFisher/distributed-storage/protos"
@@ -10,8 +11,14 @@ import (
 )
 
 func main() {
-	// Create a TCP connection on port 6000 for the GRPC server
-	listen, err := net.Listen("tcp", ":6000")
+	serve(6000)
+
+	// TODO: Start assigning candidate nodes a role to build a chain
+}
+
+func serve(port int) {
+	// Create a TCP connection for the GRPC server
+	listen, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		log.Fatalf("Failed to open tcp listener... %v", err.Error())
 	}

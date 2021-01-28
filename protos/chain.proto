@@ -9,21 +9,24 @@ message RegisterRequest {
 
 message RegisterResponse {}
 
-// message RequestJoinResponse {
-//     enum NodeType {
-//         HEAD = 0;
-//         TAIL = 1;
-//         STANDARD = 2;
-//     }
+message AssignRequest {
+    enum NodeType {
+        HEAD = 0;
+        TAIL = 1;
+        MID = 2;
+    }
 
-//     bool ok = 2;
-//     NodeType type = 3;
-//     string predecessor = 4;
-//     string successor = 5;
-// }
+    NodeType type = 3;
+    string predecessor = 4;
+    string successor = 5;
+}
+
+message AssignResponse {}
 
 service Chain {
-    // Node->Master - Requesting to join the chain
+    // Node -> Master - Requesting to join the chain
     rpc Register(RegisterRequest) returns (RegisterResponse);
+    // Master -> Node - Assign a node a position in the chain
+    rpc Assign(AssignRequest) returns (AssignResponse);
 }
 

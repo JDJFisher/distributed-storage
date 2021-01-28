@@ -2,7 +2,6 @@ package servers
 
 import (
 	"context"
-	// "log"
 
 	"github.com/JDJFisher/distributed-storage/protos"
 )
@@ -13,11 +12,15 @@ type StorageServer struct {
 }
 
 func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*protos.ReadResponse, error) {
-	// log.Println("Foo")
+
+	// TODO: Only serve if assigned a role in the chain
+
 	return &protos.ReadResponse{}, nil
 }
 
 func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*protos.WriteResponse, error) {
-	// log.Println("Bar")
+
+	// TODO: Only serve if assigned a role in the chain
+
 	return &protos.WriteResponse{}, nil
 }

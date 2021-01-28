@@ -38,18 +38,16 @@ func main() {
 	chainClient := protos.NewChainClient(conn)
 
 	// Repetitively attempt to join the chain
-	for {
+	for j := 0; j <= 10; j++ {
 		_, err := chainClient.Register(context.Background(), &protos.RegisterRequest{Address: os.Getenv("address")})
 		if err != nil {
 			log.Fatalf("Error joining the chain network - %v", err.Error())
-			time.Sleep(5000)
+			time.Sleep(5 * time.Second)
 		} else {
 			log.Println("Accepted into the chain")
 			break
 		}
 	}
-
-	// TODO: Wait until assigned a role in the chain
 
 	serve(port)
 }
@@ -63,6 +61,10 @@ func serve(port int) {
 
 	// Create a GRPC server
 	grpcServer := grpc.NewServer()
+
+	// Register chain service
+	chainServer := servers.ChainServer{}
+	protos.RegisterChainServer(grpcServer, &chainServer)
 
 	// Register storage service
 	storageServer := servers.StorageServer{}

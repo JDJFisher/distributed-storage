@@ -18,8 +18,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChainClient interface {
-	// Node->Master - Requesting to join the chain
+	// Node -> Master - Requesting to join the chain
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+	// Master -> Node - Assign a node a position in the chain
+	Assign(ctx context.Context, in *AssignRequest, opts ...grpc.CallOption) (*AssignResponse, error)
 }
 
 type chainClient struct {
@@ -39,12 +41,23 @@ func (c *chainClient) Register(ctx context.Context, in *RegisterRequest, opts ..
 	return out, nil
 }
 
+func (c *chainClient) Assign(ctx context.Context, in *AssignRequest, opts ...grpc.CallOption) (*AssignResponse, error) {
+	out := new(AssignResponse)
+	err := c.cc.Invoke(ctx, "/Chain/Assign", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChainServer is the server API for Chain service.
 // All implementations must embed UnimplementedChainServer
 // for forward compatibility
 type ChainServer interface {
-	// Node->Master - Requesting to join the chain
+	// Node -> Master - Requesting to join the chain
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
+	// Master -> Node - Assign a node a position in the chain
+	Assign(context.Context, *AssignRequest) (*AssignResponse, error)
 	mustEmbedUnimplementedChainServer()
 }
 
@@ -54,6 +67,9 @@ type UnimplementedChainServer struct {
 
 func (UnimplementedChainServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedChainServer) Assign(context.Context, *AssignRequest) (*AssignResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Assign not implemented")
 }
 func (UnimplementedChainServer) mustEmbedUnimplementedChainServer() {}
 
@@ -86,6 +102,24 @@ func _Chain_Register_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Chain_Assign_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChainServer).Assign(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Chain/Assign",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChainServer).Assign(ctx, req.(*AssignRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Chain_ServiceDesc is the grpc.ServiceDesc for Chain service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -96,6 +130,10 @@ var Chain_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Register",
 			Handler:    _Chain_Register_Handler,
+		},
+		{
+			MethodName: "Assign",
+			Handler:    _Chain_Assign_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
