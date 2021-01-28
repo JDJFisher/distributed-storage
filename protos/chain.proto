@@ -4,7 +4,7 @@ option go_package = "github.com/JDJFisher/distributed-storage/protos";
 
 // Provide the name of the service which is joining (docker service name), allows the network to then send messages back by using the docker DNS
 message RegisterRequest {
-    string serviceName = 1;
+    string address = 1;
 }
 
 message RegisterResponse {}

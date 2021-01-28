@@ -27,7 +27,7 @@ services:
         environment:
             - docker=true
 
-    node:
+    node-1:
         build:
             context: .
             dockerfile: ./node/Dockerfile
@@ -41,7 +41,23 @@ services:
             - 5000:5000
         environment:
             - docker=true
-            - serviceName=node-1
+            - address="node-1:5000"
+
+    node-2:
+        build:
+            context: .
+            dockerfile: ./node/Dockerfile
+        depends_on:
+            - master
+        volumes:
+            - .:/code
+        networks:
+            - internal
+        ports:
+            - 5001:5001
+        environment:
+            - docker=true
+            - address="node-2:5001"
 
 networks:
     internal:

@@ -32,7 +32,7 @@ func main() {
 
 	// Repetitively attempt to join the chain
 	for {
-		_, err := chainClient.Register(context.Background(), &protos.RegisterRequest{ServiceName: "node-1"})
+		_, err := chainClient.Register(context.Background(), &protos.RegisterRequest{Address: os.Getenv("address")})
 		if err != nil {
 			log.Fatalf("Error joining the chain network - %v", err.Error())
 			time.Sleep(5000)
@@ -44,13 +44,12 @@ func main() {
 
 	// TODO: Wait until assigned a role in the chain
 
-	// Serve
-	serve()
+	// serve()
 }
 
 func serve() {
-	// Create a TCP connection on port 5000 for the GRPC server
-	listen, err := net.Listen("tcp", ":5000")
+	// Create a TCP connection for the GRPC server
+	listen, err := net.Listen("tcp", os.Getenv("address"))
 	if err != nil {
 		log.Fatalf("Failed to open tcp listener... %v", err.Error())
 	}

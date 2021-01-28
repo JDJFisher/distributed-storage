@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	"google.golang.org/grpc/peer"
+
 	"github.com/JDJFisher/distributed-storage/protos"
 )
 
@@ -19,10 +21,13 @@ type ChainServer struct {
 
 // Register ...
 func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest) (*protos.RegisterResponse, error) {
-	newCandidateNode := &CandidateNode{name: req.ServiceName}
+	p, _ := peer.FromContext(ctx)
+	addr := p.Addr.String()
+
+	newCandidateNode := &CandidateNode{name: addr}
 	s.CandidateNodes = append(s.CandidateNodes, newCandidateNode)
 
-	log.Printf("Added %v to candidates", req.ServiceName)
+	log.Printf("Added %v to candidates", addr)
 
 	return &protos.RegisterResponse{}, nil
 }

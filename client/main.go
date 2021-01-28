@@ -29,6 +29,12 @@ func main() {
 	// Create storage client
 	storageClient := protos.NewStorageClient(conn)
 
+	// Fake requests
+	fake(storageClient)
+}
+
+func fake(storageClient protos.StorageClient) {
+
 	// Load dummy requests from seeder
 	file, err := os.Open("seeder.csv")
 	if err != nil {
@@ -46,13 +52,22 @@ func main() {
 		time.Sleep(5000)
 		log.Println("Dispatching request", i, ":", line)
 
-		// TODO: Execute a Write if line has a value value otherwise do a read
-	}
-
-	response, err := storageClient.Read(context.Background(), &protos.ReadRequest{})
-	if err != nil {
-		log.Fatalf("Error reading from master - %v", err.Error())
-	} else {
-		log.Printf("Response from master: \n %s", response)
+		if line[1] == "" {
+			// Fake a read
+			response, err := storageClient.Read(context.Background(), &protos.ReadRequest{})
+			if err != nil {
+				log.Fatalln("Error reading", err.Error())
+			} else {
+				log.Println("Read Response", response)
+			}
+		} else {
+			// Fake a write
+			response, err := storageClient.Write(context.Background(), &protos.WriteRequest{})
+			if err != nil {
+				log.Fatalln("Error writing", err.Error())
+			} else {
+				log.Println("Read Response", response)
+			}
+		}
 	}
 }
