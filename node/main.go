@@ -5,6 +5,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/JDJFisher/distributed-storage/node/servers"
 	"github.com/JDJFisher/distributed-storage/protos"
@@ -12,35 +14,49 @@ import (
 )
 
 func main() {
+	// Determine port number
+	port, err := strconv.Atoi(os.Getenv("port"))
+	if err != nil {
+		port = 7000
+	}
+
 	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":6789"
+	grpcHost := ":6000"
 	if os.Getenv("docker") == "true" {
 		grpcHost = "master" + grpcHost
 	}
 
+	// Create GRPC client
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(grpcHost, grpc.WithInsecure())
+	conn, err = grpc.Dial(grpcHost, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to the master - %v", err.Error())
 	}
 	defer conn.Close()
 
-	networkClient := protos.NewNetworkClient(conn)
+	// Create Chain client
+	chainClient := protos.NewChainClient(conn)
 
-	response, err := networkClient.RequestJoin(context.Background(), &protos.RequestJoinRequest{ServiceName: "node-1"})
-	if err != nil {
-		log.Fatalf("Error joining the chain network - %v", err.Error())
+	// Repetitively attempt to join the chain
+	for {
+		_, err := chainClient.Register(context.Background(), &protos.RegisterRequest{Address: os.Getenv("address")})
+		if err != nil {
+			log.Fatalf("Error joining the chain network - %v", err.Error())
+			time.Sleep(5000)
+		} else {
+			log.Println("Accepted into the chain")
+			break
+		}
 	}
 
-	log.Printf("Response from master: \n %s", response.Type)
+	// TODO: Wait until assigned a role in the chain
 
-	// TODO: Only serve once accepted in to the chain
-	serve()
+	serve(port)
 }
 
-func serve() {
-	// Create a TCP connection on port 5000 for the GRPC server
-	listen, err := net.Listen("tcp", ":5000")
+func serve(port int) {
+	// Create a TCP connection for the GRPC server
+	listen, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		log.Fatalf("Failed to open tcp listener... %v", err.Error())
 	}
