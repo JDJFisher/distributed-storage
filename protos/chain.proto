@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "github.com/JDJFisher/distributed-storage/protos";
+
+// Provide the name of the service which is joining (docker service name), allows the network to then send messages back by using the docker DNS
+message RegisterRequest {
+    string address = 1;
+}
+
+message RegisterResponse {}
+
+// message RequestJoinResponse {
+//     enum NodeType {
+//         HEAD = 0;
+//         TAIL = 1;
+//         STANDARD = 2;
+//     }
+
+//     bool ok = 2;
+//     NodeType type = 3;
+//     string predecessor = 4;
+//     string successor = 5;
+// }
+
+service Chain {
+    // Node->Master - Requesting to join the chain
+    rpc Register(RegisterRequest) returns (RegisterResponse);
+}
+

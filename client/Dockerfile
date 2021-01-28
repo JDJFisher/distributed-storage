@@ -12,7 +12,7 @@ WORKDIR /app/client
 # Download the depdencies of the project
 RUN go mod download
 
-# # Build the go project into a binary
+# Build the go project into a binary
 RUN go build main.go
 
 # Expose the GRPC port we'll be using
