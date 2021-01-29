@@ -19,7 +19,7 @@ func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*pro
 
 	value, _ := s.Cache.Get(req.Key)
 
-	return &protos.ReadResponse{Value: value}, nil
+	return &protos.ReadResponse{Value: value.(string)}, nil
 }
 
 func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*protos.WriteResponse, error) {

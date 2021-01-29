@@ -1,6 +1,6 @@
 syntax = "proto3";
 option go_package = "github.com/JDJFisher/distributed-storage/protos";
-import "google/protobuf/any.proto";
+// import "google/protobuf/any.proto";
 
 message ReadRequest {
   string key = 1;
@@ -8,15 +8,15 @@ message ReadRequest {
 
 message WriteRequest {
   string key = 1;
-  google.protobuf.Any value = 2;
+  string value = 2;
 }
 
 message ReadResponse {
-  google.protobuf.Any value = 1;
+  string value = 1;
 }
 
 message WriteResponse {
-  google.protobuf.Any value = 1;
+  string value = 1;
 }
 
 service Storage {
