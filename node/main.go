@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/patrickmn/go-cache"
+
 	"github.com/JDJFisher/distributed-storage/node/servers"
 	"github.com/JDJFisher/distributed-storage/protos"
 	"google.golang.org/grpc"
@@ -66,8 +68,11 @@ func serve(port int) {
 	chainServer := servers.ChainServer{}
 	protos.RegisterChainServer(grpcServer, &chainServer)
 
+	// Create a cache
+	c := cache.New(cache.NoExpiration, 0)
+
 	// Register storage service
-	storageServer := servers.StorageServer{}
+	storageServer := servers.StorageServer{Cache: c}
 	protos.RegisterStorageServer(grpcServer, &storageServer)
 
 	// Start serving GRPC requests on the open tcp connection
