@@ -51,10 +51,10 @@ func main() {
 		}
 	}
 
-	serve(port)
+	serve(port, conn)
 }
 
-func serve(port int) {
+func serve(port int, conn *grpc.ClientConn) {
 	// Create a TCP connection for the GRPC server
 	listen, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
@@ -75,9 +75,25 @@ func serve(port int) {
 	storageServer := servers.StorageServer{Cache: c}
 	protos.RegisterStorageServer(grpcServer, &storageServer)
 
+	//Helath check client
+	healthClient := protos.NewHealthClient(conn)
+	go sendHealthCheck(healthClient)
+
 	// Start serving GRPC requests on the open tcp connection
 	err = grpcServer.Serve(listen)
 	if err != nil {
 		log.Fatalf("Failed to start serving the grpc server %v", err.Error())
 	}
+}
+
+func sendHealthCheck(healthClient protos.HealthClient) {
+	for {
+		<-time.After(2 * time.Second)
+		response, err := healthClient.Alive(context.Background(), &protos.HealthCheckRequest{Service: os.Getenv("address")})
+		if err != nil {
+			log.Fatalln("Error health checking with the master")
+		}
+		log.Printf("Sent health check to master - status: %v", response.Status)
+	}
+
 }

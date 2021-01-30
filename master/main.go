@@ -5,6 +5,7 @@ import (
 	"net"
 	"strconv"
 
+	"github.com/JDJFisher/distributed-storage/master/health"
 	"github.com/JDJFisher/distributed-storage/master/servers"
 	"github.com/JDJFisher/distributed-storage/protos"
 	"google.golang.org/grpc"
@@ -33,6 +34,12 @@ func serve(port int) {
 	// Register storage service
 	storageServer := servers.StorageServer{}
 	protos.RegisterStorageServer(grpcServer, &storageServer)
+
+	//Register a health checking server - uses a new() func to initialize the map
+	healthServer := health.NewHealthServer()
+	protos.RegisterHealthServer(grpcServer, healthServer)
+	//Check the status of nodes every 5 seconds
+	go healthServer.CheckNodes(5)
 
 	// Start serving GRPC requests on the open tcp connection
 	log.Println("Starting master")
