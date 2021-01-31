@@ -27,7 +27,7 @@ services:
         environment:
             - docker=true
 
-    node-1:
+    node-0:
         build:
             context: .
             dockerfile: ./node/Dockerfile
@@ -42,24 +42,41 @@ services:
         environment:
             - docker=true
             - port=7000
-            - address="node-1:7000"
+            - name="node-0:7000"
 
-    # node-2:
-    #     build:
-    #         context: .
-    #         dockerfile: ./node/Dockerfile
-    #     depends_on:
-    #         - master
-    #     volumes:
-    #         - .:/code
-    #     networks:
-    #         - internal
-    #     ports:
-    #         - 7001:7001
-    #     environment:
-    #         - docker=true
-    #         - port=7001
-    #         - address="node-2:7001"
+    node-1:
+        build:
+            context: .
+            dockerfile: ./node/Dockerfile
+        depends_on:
+            - master
+        volumes:
+            - .:/code
+        networks:
+            - internal
+        ports:
+            - 7001:7001
+        environment:
+            - docker=true
+            - port=7001
+            - name="node-1:7001"
+
+    node-2:
+        build:
+            context: .
+            dockerfile: ./node/Dockerfile
+        depends_on:
+            - master
+        volumes:
+            - .:/code
+        networks:
+            - internal
+        ports:
+            - 7002:7002
+        environment:
+            - docker=true
+            - port=7002
+            - name="node-2:7002"
 
 networks:
     internal:
