@@ -5,6 +5,7 @@ import (
 	"net"
 	"strconv"
 
+	"github.com/JDJFisher/distributed-storage/master/chain"
 	"github.com/JDJFisher/distributed-storage/master/health"
 	"github.com/JDJFisher/distributed-storage/master/servers"
 	"github.com/JDJFisher/distributed-storage/protos"
@@ -27,17 +28,21 @@ func serve(port int) {
 	// Create a GRPC server
 	grpcServer := grpc.NewServer()
 
+	//Create a new chain
+	chain := chain.NewChain()
+
 	// Register Chain service
-	chainServer := servers.ChainServer{}
-	protos.RegisterChainServer(grpcServer, &chainServer)
+	chainServer := servers.NewChainServer(chain)
+	protos.RegisterChainServer(grpcServer, chainServer)
 
 	// Register storage service
 	storageServer := servers.StorageServer{}
 	protos.RegisterStorageServer(grpcServer, &storageServer)
 
 	//Register a health checking server - uses a new() func to initialize the map
-	healthServer := health.NewHealthServer()
+	healthServer := health.NewHealthServer(chain)
 	protos.RegisterHealthServer(grpcServer, healthServer)
+
 	//Check the status of nodes every 5 seconds
 	go healthServer.CheckNodes(5)
 
