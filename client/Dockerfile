@@ -10,9 +10,9 @@ COPY go.mod .
 COPY go.sum .
 COPY protos .
 
-#Using this command speeds up the actual build process by a lot compared to using "go mod download"
-RUN go mod graph | awk '{if ($1 !~ "@") print $2}' | xargs go get
-# RUN go mod download
+ENV GO111MODULE=on
+RUN go mod download
+
 COPY . .
 
 RUN go build ./client/main.go

@@ -2,32 +2,56 @@ package servers
 
 import (
 	"context"
-	"log"
+	"sync"
 
 	"google.golang.org/grpc/peer"
 
 	"github.com/JDJFisher/distributed-storage/protos"
 )
 
-type CandidateNode struct {
-	address string
-}
-
 // ChainServer ...
 type ChainServer struct {
 	protos.UnimplementedChainServer
-	CandidateNodes []*CandidateNode
+	sync.RWMutex
+	Chain *Chain
 }
 
 // Register ...
 func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest) (*protos.RegisterResponse, error) {
 	p, _ := peer.FromContext(ctx)
-	addr := p.Addr.String()
 
-	newCandidateNode := &CandidateNode{address: req.Address}
-	s.CandidateNodes = append(s.CandidateNodes, newCandidateNode)
+	s.Lock()
+	defer s.Unlock()
 
-	log.Printf("Added %v (%v) to candidates", req.Address, addr)
+	// Create a new node
+	node := &Node{
+		debug:       req.Name,
+		address:     p.Addr.String(),
+		successor:   nil,
+		predecessor: nil}
 
-	return &protos.RegisterResponse{}, nil
+	// No chain exists yet, lets create one!
+	if s.Chain == nil {
+		s.Chain = NewChain(node)
+	} else {
+		// Add to the chain, one already exists
+		node.predecessor = s.Chain.Tail
+
+		// TODO: Transfer tailness to the new tail
+		s.Chain.Tail.successor = node
+		s.Chain.Tail = node
+	}
+
+	preAddr := ""
+	sucAddr := ""
+	if node.predecessor != nil {
+		sucAddr = node.predecessor.address
+	}
+	if node.successor != nil {
+		sucAddr = node.successor.address
+	}
+
+	s.Chain.Print()
+
+	return &protos.RegisterResponse{Predecessor: preAddr, Successor: sucAddr}, nil
 }
