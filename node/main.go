@@ -5,6 +5,10 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
+	"time"
+
+	"github.com/patrickmn/go-cache"
 
 	"github.com/JDJFisher/distributed-storage/node/servers"
 	"github.com/JDJFisher/distributed-storage/protos"
@@ -12,35 +16,47 @@ import (
 )
 
 func main() {
+	// Determine port number
+	port, err := strconv.Atoi(os.Getenv("port"))
+	if err != nil {
+		port = 7000
+	}
+
 	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":6789"
+	grpcHost := ":6000"
 	if os.Getenv("docker") == "true" {
 		grpcHost = "master" + grpcHost
 	}
 
+	// Create GRPC client
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(grpcHost, grpc.WithInsecure())
+	conn, err = grpc.Dial(grpcHost, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to the master - %v", err.Error())
 	}
 	defer conn.Close()
 
-	networkClient := protos.NewNetworkClient(conn)
+	// Create Chain client
+	chainClient := protos.NewChainClient(conn)
 
-	response, err := networkClient.RequestJoin(context.Background(), &protos.RequestJoinRequest{ServiceName: "node-1"})
-	if err != nil {
-		log.Fatalf("Error joining the chain network - %v", err.Error())
+	// Repetitively attempt to join the chain
+	for j := 0; j <= 10; j++ {
+		_, err := chainClient.Register(context.Background(), &protos.RegisterRequest{Name: os.Getenv("name")})
+		if err != nil {
+			log.Fatalf("Error joining the chain network - %v", err.Error())
+			time.Sleep(5 * time.Second)
+		} else {
+			log.Println("Accepted into the chain")
+			break
+		}
 	}
 
-	log.Printf("Response from master: \n %s", response.Type)
-
-	// TODO: Only serve once accepted in to the chain
-	serve()
+	serve(port, conn)
 }
 
-func serve() {
-	// Create a TCP connection on port 5000 for the GRPC server
-	listen, err := net.Listen("tcp", ":5000")
+func serve(port int, conn *grpc.ClientConn) {
+	// Create a TCP connection for the GRPC server
+	listen, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		log.Fatalf("Failed to open tcp listener... %v", err.Error())
 	}
@@ -48,13 +64,36 @@ func serve() {
 	// Create a GRPC server
 	grpcServer := grpc.NewServer()
 
+	// Register chain service
+	chainServer := servers.ChainServer{}
+	protos.RegisterChainServer(grpcServer, &chainServer)
+
+	// Create a cache
+	c := cache.New(cache.NoExpiration, 0)
+
 	// Register storage service
-	storageServer := servers.StorageServer{}
+	storageServer := servers.StorageServer{Cache: c}
 	protos.RegisterStorageServer(grpcServer, &storageServer)
+
+	//Helath check client
+	healthClient := protos.NewHealthClient(conn)
+	go sendHealthCheck(healthClient)
 
 	// Start serving GRPC requests on the open tcp connection
 	err = grpcServer.Serve(listen)
 	if err != nil {
 		log.Fatalf("Failed to start serving the grpc server %v", err.Error())
 	}
+}
+
+func sendHealthCheck(healthClient protos.HealthClient) {
+	for {
+		<-time.After(2 * time.Second)
+		_, err := healthClient.Alive(context.Background(), &protos.HealthCheckRequest{Name: os.Getenv("name")})
+		if err != nil {
+			log.Fatalln("Error health checking with the master")
+		}
+		//log.Printf("Sent health check to master - status: %v", response.Status)
+	}
+
 }

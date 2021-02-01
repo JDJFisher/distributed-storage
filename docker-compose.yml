@@ -1,17 +1,17 @@
 version: '3.9'
 services:
-    client:
-        build:
-            context: .
-            dockerfile: ./client/Dockerfile
-        depends_on:
-            - master
-        volumes:
-            - .:/code
-        networks:
-            - external
-        environment:
-            - docker=true
+    # client:
+    #     build:
+    #         context: .
+    #         dockerfile: ./client/Dockerfile
+    #     depends_on:
+    #         - master
+    #     volumes:
+    #         - .:/code
+    #     networks:
+    #         - external
+    #     environment:
+    #         - docker=true
 
     master:
         build:
@@ -23,11 +23,11 @@ services:
             - internal
             - external
         ports:
-            - 6789:6789
+            - 6000:6000
         environment:
             - docker=true
 
-    node:
+    node-0:
         build:
             context: .
             dockerfile: ./node/Dockerfile
@@ -38,10 +38,45 @@ services:
         networks:
             - internal
         ports:
-            - 5000:5000
+            - 7000:7000
         environment:
             - docker=true
-            - serviceName=node-1
+            - port=7000
+            - name="node-0:7000"
+
+    node-1:
+        build:
+            context: .
+            dockerfile: ./node/Dockerfile
+        depends_on:
+            - master
+        volumes:
+            - .:/code
+        networks:
+            - internal
+        ports:
+            - 7001:7001
+        environment:
+            - docker=true
+            - port=7001
+            - name="node-1:7001"
+
+    node-2:
+        build:
+            context: .
+            dockerfile: ./node/Dockerfile
+        depends_on:
+            - master
+        volumes:
+            - .:/code
+        networks:
+            - internal
+        ports:
+            - 7002:7002
+        environment:
+            - docker=true
+            - port=7002
+            - name="node-2:7002"
 
 networks:
     internal:

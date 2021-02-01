@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"log"
 	"os"
+	"time"
 
 	"github.com/JDJFisher/distributed-storage/protos"
 	"google.golang.org/grpc"
@@ -12,7 +13,7 @@ import (
 
 func main() {
 	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":6789"
+	grpcHost := ":6000"
 	if os.Getenv("docker") == "true" {
 		grpcHost = "master" + grpcHost
 	}
@@ -28,6 +29,12 @@ func main() {
 	// Create storage client
 	storageClient := protos.NewStorageClient(conn)
 
+	// Fake requests
+	fake(storageClient)
+}
+
+func fake(storageClient protos.StorageClient) {
+
 	// Load dummy requests from seeder
 	file, err := os.Open("seeder.csv")
 	if err != nil {
@@ -42,18 +49,40 @@ func main() {
 
 	// Loop over dummy requests
 	for i, line := range lines[1:] {
+		// Wait ...
+		time.Sleep(2 * time.Second)
 
-		// TODO: Sleep for a few seconds
+		// Determine request type
+		requestType := "R"
+		if line[1] != "" {
+			requestType = "W"
+		}
 
-		log.Println("Dispatching request", i, ":", line)
+		if requestType == "R" {
+			log.Printf("Dispatching read %v: %v", i, line[0])
 
-		// TODO: Execute a Write if line has a value value otherwise do a read
-	}
+			// Fake a read
+			request := protos.ReadRequest{Key: line[0]}
+			response, err := storageClient.Read(context.Background(), &request)
 
-	response, err := storageClient.Read(context.Background(), &protos.ReadRequest{})
-	if err != nil {
-		log.Fatalf("Error reading from master - %v", err.Error())
-	} else {
-		log.Printf("Response from master: \n %s", response)
+			if err != nil {
+				log.Fatalf("Failed read %v: %v", i, err.Error())
+			} else {
+				log.Printf("Recieved response %v: %v", i, response.Value)
+			}
+		} else {
+			log.Printf("Dispatching write %v: %v->%v", i, line[0], line[1])
+
+			// Fake a write
+			request := protos.WriteRequest{Key: line[0], Value: line[1]}
+			response, err := storageClient.Write(context.Background(), &request)
+
+			if err != nil {
+				log.Fatalf("Failed write %v: %v", i, err.Error())
+			} else {
+				log.Printf("Recieved response %v: %v", i, response.Value)
+			}
+		}
+
 	}
 }

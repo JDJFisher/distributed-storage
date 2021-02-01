@@ -18,7 +18,7 @@ func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*pro
 	log.Println("Received a read request")
 
 	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":5000"
+	grpcHost := ":7000"
 	if os.Getenv("docker") == "true" {
 		grpcHost = "node-1" + grpcHost // TODO: Fetch host from the chain
 	}
@@ -47,7 +47,7 @@ func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*p
 	log.Println("Received a write request")
 
 	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":5000"
+	grpcHost := ":7000"
 	if os.Getenv("docker") == "true" {
 		grpcHost = "node-1" + grpcHost // TODO: Fetch host from the chain
 	}
