@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/csv"
 	"log"
 	"os"
 	"time"
@@ -35,47 +34,43 @@ func main() {
 
 func fake(storageClient protos.StorageClient) {
 
-	// Load dummy requests from seeder
-	file, err := os.Open("seeder.csv")
-	if err != nil {
-		log.Fatal("Unable to read seeder file", err)
-	}
-	defer file.Close()
-	csvReader := csv.NewReader(file)
-	lines, err := csvReader.ReadAll()
-	if err != nil {
-		log.Fatal("Unable to parse seeder as CSV", err)
+	// Declare dummy requests
+	var dummyRequests = [...]interface{}{
+		&protos.WriteRequest{Key: "alpha", Value: "foo"},
+		&protos.ReadRequest{Key: "alpha"},
+		&protos.WriteRequest{Key: "alpha", Value: "bar"},
+		&protos.WriteRequest{Key: "beta", Value: "baz"},
+		&protos.ReadRequest{Key: "alpha"},
+		&protos.ReadRequest{Key: "beta"},
 	}
 
 	// Loop over dummy requests
-	for i, line := range lines[1:] {
+	for i, request := range dummyRequests {
 		// Wait ...
 		time.Sleep(2 * time.Second)
 
-		// Determine request type
-		requestType := "R"
-		if line[1] != "" {
-			requestType = "W"
-		}
+		switch request.(type) {
+		// Panic
+		default:
+			log.Panicln("Unexpected request type")
 
-		if requestType == "R" {
-			log.Printf("Dispatching read %v: %v", i, line[0])
+		// Fake a read
+		case *protos.ReadRequest:
+			log.Printf("Dispatching read %v: %v", i, request.(*protos.ReadRequest).Key)
 
-			// Fake a read
-			request := protos.ReadRequest{Key: line[0]}
-			response, err := storageClient.Read(context.Background(), &request)
+			response, err := storageClient.Read(context.Background(), request.(*protos.ReadRequest))
 
 			if err != nil {
 				log.Fatalf("Failed read %v: %v", i, err.Error())
 			} else {
 				log.Printf("Recieved response %v: %v", i, response.Value)
 			}
-		} else {
-			log.Printf("Dispatching write %v: %v->%v", i, line[0], line[1])
 
-			// Fake a write
-			request := protos.WriteRequest{Key: line[0], Value: line[1]}
-			response, err := storageClient.Write(context.Background(), &request)
+		// Fake a write
+		case *protos.WriteRequest:
+			log.Printf("Dispatching write %v: %v->%v", i, request.(*protos.WriteRequest).Key, request.(*protos.WriteRequest).Value)
+
+			response, err := storageClient.Write(context.Background(), request.(*protos.WriteRequest))
 
 			if err != nil {
 				log.Fatalf("Failed write %v: %v", i, err.Error())
@@ -83,6 +78,5 @@ func fake(storageClient protos.StorageClient) {
 				log.Printf("Recieved response %v: %v", i, response.Value)
 			}
 		}
-
 	}
 }

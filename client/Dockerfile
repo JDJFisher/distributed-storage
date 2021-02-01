@@ -20,6 +20,5 @@ RUN go build ./client/main.go
 # <- Second step to build minimal image
 FROM golang:1.15-alpine
 COPY --from=build /app/main main
-EXPOSE 6789
 RUN ["chmod", "+x", "./main"]
 CMD ["./main"]

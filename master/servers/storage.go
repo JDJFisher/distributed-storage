@@ -20,7 +20,7 @@ func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*pro
 	// Different grpc connection info depending on if it's running in docker or not
 	grpcHost := ":7000"
 	if os.Getenv("docker") == "true" {
-		grpcHost = "node-1" + grpcHost // TODO: Fetch host from the chain
+		grpcHost = "node-0" + grpcHost // TODO: Fetch host from the chain
 	}
 
 	// Open a connection to the tail node
@@ -49,7 +49,7 @@ func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*p
 	// Different grpc connection info depending on if it's running in docker or not
 	grpcHost := ":7000"
 	if os.Getenv("docker") == "true" {
-		grpcHost = "node-1" + grpcHost // TODO: Fetch host from the chain
+		grpcHost = "node-0" + grpcHost // TODO: Fetch host from the chain
 	}
 
 	// Open a connection to the head node
