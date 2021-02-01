@@ -2,7 +2,6 @@ package health
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -24,7 +23,7 @@ func NewHealthServer(chain *chain.Chain) *HealthServer {
 
 //Alive (Node -> Master) - Health check ping coming from the node
 func (s *HealthServer) Alive(ctx context.Context, req *protos.HealthCheckRequest) (*protos.HealthCheckResponse, error) {
-	//log.Printf("Received health check from: %s", req.Name)
+	log.Printf("Received health check from: %s", req.Name)
 	//TODO - check if we actually care about this node, if we dont reply the node should kill itself or try to rejoin the chain
 	s.Lock()
 	defer s.Unlock()
@@ -46,7 +45,7 @@ func (s *HealthServer) CheckNodes(interval uint8) {
 				log.Printf("Node %s hasnt sent a health check within %d seconds!", k, interval)
 
 				//TODO - Remove the node from the chain and
-				
+
 			}
 		}
 	}
