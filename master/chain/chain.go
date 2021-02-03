@@ -48,12 +48,12 @@ func (chain *Chain) Print() {
 func (chain *Chain) GetNode(address string) *Node {
 	node := chain.Head
 	for {
-		if node.Address == address {
-			return node
-		} else if node.successor != nil {
-			node = node.successor
-		} else {
+		if node == nil {
 			return nil
+		} else if node.Address == address {
+			return node
+		} else {
+			node = node.successor
 		}
 	}
 }
