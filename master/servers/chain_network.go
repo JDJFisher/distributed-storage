@@ -30,15 +30,16 @@ func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest)
 
 	chainLen := s.Chain.Len()
 
-	//If the chain is empty we need to manually setup the node pointers
+	// If the chain is empty we need to manually setup the node pointers
 	if chainLen == 0 {
 		node = chain.NewNode(req.Address, nil, nil)
 		s.Chain.Head = node
 		s.Chain.Tail = node
 	} else {
-		//Add to the tail!
+		// Add to the tail!
 		node = chain.NewNode(req.Address, nil, s.Chain.Tail)
 		s.Chain.Tail.SetSucc(node)
+		s.Chain.Tail.UpdateNeighbours(s.Chain.Tail.Address, node.Address)
 		s.Chain.Tail = node
 	}
 	s.Chain.Print()

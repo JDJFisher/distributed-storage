@@ -76,15 +76,15 @@ func serve(port int, conn *grpc.ClientConn, neighbours *servers.Neighbours) {
 	grpcServer := grpc.NewServer()
 
 	// Register chain service
-	chainServer := servers.ChainServer{Neighbours: neighbours}
-	protos.RegisterChainServer(grpcServer, &chainServer)
+	chainServer := servers.NewChainServer(neighbours)
+	protos.RegisterChainServer(grpcServer, chainServer)
 
 	// Create a cache
 	c := cache.New(cache.NoExpiration, 0)
 
 	// Register storage service
-	storageServer := servers.StorageServer{Cache: c}
-	protos.RegisterStorageServer(grpcServer, &storageServer)
+	storageServer := servers.NewStorageServer(neighbours, c)
+	protos.RegisterStorageServer(grpcServer, storageServer)
 
 	// Health check client
 	healthClient := protos.NewHealthClient(conn)

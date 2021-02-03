@@ -12,13 +12,18 @@ type Neighbours struct {
 	SuccAddress string
 }
 
-// ChainServer ...
+// ChainServer - ...
 type ChainServer struct {
 	protos.UnimplementedChainServer
 	Neighbours *Neighbours
 }
 
-// UpdateNeighbours ...
+// NewChainServer - Create a new chain server object
+func NewChainServer(neighbours *Neighbours) *ChainServer {
+	return &ChainServer{Neighbours: neighbours}
+}
+
+// UpdateNeighbours - ...
 func (s *ChainServer) UpdateNeighbours(ctx context.Context, req *protos.NeighbourInfo) (*protos.OkReponse, error) {
 	s.Neighbours.PredAddress = req.PredAddress
 	s.Neighbours.SuccAddress = req.SuccAddress
