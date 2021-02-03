@@ -8,8 +8,8 @@ message RegisterRequest {
 }
 
 message NeighbourInfo {
-    string predecessor = 1;
-    string successor = 2;
+    string predAddress = 1;
+    string succAddress = 2;
 }
 
 message OkReponse {}

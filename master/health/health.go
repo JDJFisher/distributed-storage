@@ -43,6 +43,9 @@ func (s *HealthServer) CheckNodes(interval uint8) {
 			if now.Sub(latestTime).Seconds() > float64(interval) {
 				log.Printf("Node %s hasnt sent a health check within %d seconds!", address, interval)
 
+				// Remove it from the monitored nodes when it dies
+				delete(s.monitoredNodes, address)
+
 				// Find the node in the chain
 				node := s.chain.GetNode(address)
 				predecessor := node.GetPred()

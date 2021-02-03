@@ -22,8 +22,8 @@ func (node *Node) UpdateNeighbours(predAddress string, succAddress string) {
 	networkClient := protos.NewChainClient(conn)
 
 	request := &protos.NeighbourInfo{
-		Predecessor: predAddress,
-		Successor:   succAddress,
+		PredAddress: predAddress,
+		SuccAddress: succAddress,
 	}
 
 	_, err = networkClient.UpdateNeighbours(context.Background(), request)

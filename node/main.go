@@ -39,22 +39,33 @@ func main() {
 	// Create Chain client
 	chainClient := protos.NewChainClient(conn)
 
+	var neighbours *servers.Neighbours
+
 	// Repetitively attempt to join the chain
 	for j := 0; j <= 10; j++ {
-		_, err := chainClient.Register(context.Background(), &protos.RegisterRequest{Address: os.Getenv("address")})
+		request := &protos.RegisterRequest{Address: os.Getenv("address")}
+		response, err := chainClient.Register(context.Background(), request)
+
 		if err != nil {
 			log.Fatalf("Error joining the chain network - %v", err.Error())
 			time.Sleep(5 * time.Second)
-		} else {
-			log.Println("Accepted into the chain")
-			break
+			continue
 		}
+
+		// Store ...
+		neighbours = &servers.Neighbours{
+			PredAddress: response.PredAddress,
+			SuccAddress: response.SuccAddress,
+		}
+
+		log.Println("Accepted into the chain")
+		break
 	}
 
-	serve(port, conn)
+	serve(port, conn, neighbours)
 }
 
-func serve(port int, conn *grpc.ClientConn) {
+func serve(port int, conn *grpc.ClientConn, neighbours *servers.Neighbours) {
 	// Create a TCP connection for the GRPC server
 	listen, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
@@ -65,7 +76,7 @@ func serve(port int, conn *grpc.ClientConn) {
 	grpcServer := grpc.NewServer()
 
 	// Register chain service
-	chainServer := servers.ChainServer{}
+	chainServer := servers.ChainServer{Neighbours: neighbours}
 	protos.RegisterChainServer(grpcServer, &chainServer)
 
 	// Create a cache
@@ -75,7 +86,7 @@ func serve(port int, conn *grpc.ClientConn) {
 	storageServer := servers.StorageServer{Cache: c}
 	protos.RegisterStorageServer(grpcServer, &storageServer)
 
-	//Helath check client
+	// Health check client
 	healthClient := protos.NewHealthClient(conn)
 	go sendHealthCheck(healthClient)
 
