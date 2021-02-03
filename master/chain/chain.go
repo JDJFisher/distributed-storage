@@ -6,13 +6,12 @@ import (
 )
 
 type Node struct {
-	Debug       string
 	Address     string
 	Successor   *Node
 	Predecessor *Node
 }
 
-//Essentially a doubly linked list structure
+// Chain - Essentially a doubly linked list structure
 type Chain struct {
 	Head *Node
 	Tail *Node
@@ -23,7 +22,7 @@ func NewChain() *Chain {
 	return &Chain{}
 }
 
-//Len - The length of the chain (the number of nodes within the chain)
+// Len - The length of the chain (the number of nodes within the chain)
 func (c *Chain) Len() int {
 	if c.Head == nil {
 		return 0
@@ -38,23 +37,27 @@ func (c *Chain) Len() int {
 	}
 }
 
+// Print ...
 func (chain *Chain) Print() {
 	currentNode := chain.Head
 	fmt.Printf("[HEAD]")
 	for currentNode.Successor != nil {
-		fmt.Printf("->(%v)", currentNode.Debug)
+		fmt.Printf("->(%v)", currentNode.Address)
 		currentNode = currentNode.Successor
 	}
-	fmt.Printf("->(%v)", currentNode.Debug)
+	fmt.Printf("->(%v)", currentNode.Address)
 	fmt.Printf("[TAIL]\n")
 }
 
-func (chain *Chain) RemoveNode(debugName string) {
+// RemoveNode ...
+func (chain *Chain) RemoveNode(address string) {
 	currentNode := chain.Head
 	for currentNode.Successor != nil {
-		if currentNode.Debug == debugName {
-			//remove the node
+		if currentNode.Address != address {
+			currentNode = currentNode.Successor
 		}
-		currentNode = currentNode.Successor
+		currentNode.Predecessor.Successor = currentNode.Successor
+		currentNode.Successor.Predecessor = currentNode.Predecessor
+		return
 	}
 }

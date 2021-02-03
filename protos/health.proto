@@ -1,9 +1,9 @@
 syntax = "proto3";
 option go_package = "github.com/JDJFisher/distributed-storage/protos";
 
-//Baed on the GRPC health implementation but customised for our use case (no cli client, etc...)
+// Based on the GRPC health implementation but customised for our use case (no cli client, etc...)
 message HealthCheckRequest {
-    string name = 1;
+    string address = 1;
 }
 
 message HealthCheckResponse {
@@ -14,8 +14,8 @@ message HealthCheckResponse {
     ServingStatus status = 1;
 }
 
+// Client -> Master
 service Health {
-    //Client -> Master
     rpc Alive(HealthCheckRequest) returns (HealthCheckResponse);
 }
 

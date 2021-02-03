@@ -36,8 +36,8 @@ func serve(port int) {
 	protos.RegisterChainServer(grpcServer, chainServer)
 
 	// Register storage service
-	storageServer := servers.StorageServer{}
-	protos.RegisterStorageServer(grpcServer, &storageServer)
+	storageServer := servers.NewStorageServer(chain)
+	protos.RegisterStorageServer(grpcServer, storageServer)
 
 	//Register a health checking server - uses a new() func to initialize the map
 	healthServer := health.NewHealthServer(chain)

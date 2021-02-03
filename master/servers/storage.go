@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/JDJFisher/distributed-storage/master/chain"
 	"github.com/JDJFisher/distributed-storage/protos"
 	"google.golang.org/grpc"
 )
@@ -12,6 +13,11 @@ import (
 // StorageServer ...
 type StorageServer struct {
 	protos.UnimplementedStorageServer
+	Chain *chain.Chain
+}
+
+func NewStorageServer(chain *chain.Chain) *StorageServer {
+	return &StorageServer{Chain: chain}
 }
 
 func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*protos.ReadResponse, error) {
@@ -20,7 +26,7 @@ func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*pro
 	// Different grpc connection info depending on if it's running in docker or not
 	grpcHost := ":7000"
 	if os.Getenv("docker") == "true" {
-		grpcHost = "node-0" + grpcHost // TODO: Fetch host from the chain
+		grpcHost = s.Chain.Tail.Address
 	}
 
 	// Open a connection to the tail node
@@ -49,7 +55,7 @@ func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*p
 	// Different grpc connection info depending on if it's running in docker or not
 	grpcHost := ":7000"
 	if os.Getenv("docker") == "true" {
-		grpcHost = "node-0" + grpcHost // TODO: Fetch host from the chain
+		grpcHost = s.Chain.Tail.Address // TODO: Write to Head ...
 	}
 
 	// Open a connection to the head node

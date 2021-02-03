@@ -41,7 +41,7 @@ func main() {
 
 	// Repetitively attempt to join the chain
 	for j := 0; j <= 10; j++ {
-		_, err := chainClient.Register(context.Background(), &protos.RegisterRequest{Name: os.Getenv("name")})
+		_, err := chainClient.Register(context.Background(), &protos.RegisterRequest{Address: os.Getenv("address")})
 		if err != nil {
 			log.Fatalf("Error joining the chain network - %v", err.Error())
 			time.Sleep(5 * time.Second)
@@ -89,7 +89,7 @@ func serve(port int, conn *grpc.ClientConn) {
 func sendHealthCheck(healthClient protos.HealthClient) {
 	for {
 		<-time.After(2 * time.Second)
-		_, err := healthClient.Alive(context.Background(), &protos.HealthCheckRequest{Name: os.Getenv("name")})
+		_, err := healthClient.Alive(context.Background(), &protos.HealthCheckRequest{Address: os.Getenv("address")})
 		if err != nil {
 			log.Fatalln("Error health checking with the master")
 		}

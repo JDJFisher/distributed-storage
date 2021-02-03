@@ -23,14 +23,13 @@ func NewHealthServer(chain *chain.Chain) *HealthServer {
 
 //Alive (Node -> Master) - Health check ping coming from the node
 func (s *HealthServer) Alive(ctx context.Context, req *protos.HealthCheckRequest) (*protos.HealthCheckResponse, error) {
-	log.Printf("Received health check from: %s", req.Name)
+	log.Printf("Received health check from: %s", req.Address)
 	//TODO - check if we actually care about this node, if we dont reply the node should kill itself or try to rejoin the chain
 	s.Lock()
 	defer s.Unlock()
 
 	currentTime := time.Now()
-	serviceName := req.Name
-	s.monitoredNodes[serviceName] = currentTime
+	s.monitoredNodes[req.Address] = currentTime
 
 	return &protos.HealthCheckResponse{Status: protos.HealthCheckResponse_WAITING}, nil
 }
@@ -40,11 +39,13 @@ func (s *HealthServer) CheckNodes(interval uint8) {
 	for {
 		<-time.After(time.Duration(interval) * time.Second)
 		now := time.Now()
-		for k, v := range s.monitoredNodes {
-			if now.Sub(v).Seconds() > float64(interval) {
-				log.Printf("Node %s hasnt sent a health check within %d seconds!", k, interval)
+		for address, latestTime := range s.monitoredNodes {
+			if now.Sub(latestTime).Seconds() > float64(interval) {
+				log.Printf("Node %s hasnt sent a health check within %d seconds!", address, interval)
 
-				//TODO - Remove the node from the chain and
+				s.chain.RemoveNode(address)
+
+				// TODO: Tell the pred that its new succ is this nodes succ
 
 			}
 		}
