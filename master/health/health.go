@@ -2,7 +2,6 @@ package health
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -49,11 +48,8 @@ func (s *HealthServer) CheckNodes(interval uint8) {
 
 				// Find the node in the chain
 				node := s.chain.GetNode(address)
-				fmt.Println("got the node")
 				predecessor := node.GetPred()
-				fmt.Println("yes the node")
 				successor := node.GetSucc()
-				fmt.Println("no the node")
 
 				log.Printf("Removing node %v from the chain", node.Address)
 

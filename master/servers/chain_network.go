@@ -20,12 +20,9 @@ func NewChainServer(chain *chain.Chain) *ChainServer {
 
 // Register ...
 func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest) (*protos.NeighbourInfo, error) {
-	var node *chain.Node
-	// // TODO: Check if the node is already in the chain
-	// node := s.Chain.GetNode(req.Address)
-	// if node != nil {
-	// 	s.Chain.RemoveNode(node) // TODO: We should also remove the node from the health map
-	// }
+
+	// TODO: Check if the node is already in the chain and ...
+	node := s.Chain.GetNode(req.Address)
 
 	log.Printf("%s is requesting to join the network", req.Address)
 	s.Chain.Lock()
