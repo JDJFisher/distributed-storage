@@ -45,7 +45,7 @@ func (HealthCheckResponse_ServingStatus) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_e00c09daf2a9d300, []int{1, 0}
 }
 
-//Baed on the GRPC health implementation but customised for our use case (no cli client, etc...)
+// Based on the GRPC health implementation but customised for our use case (no cli client, etc...)
 type HealthCheckRequest struct {
 	Address              string   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`

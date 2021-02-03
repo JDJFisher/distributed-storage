@@ -19,7 +19,7 @@ func NewChainServer(chain *chain.Chain) *ChainServer {
 }
 
 // Register ...
-func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest) (*protos.RegisterResponse, error) {
+func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest) (*protos.NeighbourInfo, error) {
 	log.Printf("%s is requesting to join the network", req.Address)
 
 	s.Chain.Lock()
@@ -27,19 +27,19 @@ func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest)
 
 	chainLen := s.Chain.Len()
 
-	var newNode *chain.Node
+	var node *chain.Node
 	//If the chain is empty we need to manually setup the node pointers
 	if chainLen == 0 {
-		newNode = &chain.Node{Address: req.Address, Successor: nil, Predecessor: nil}
-		s.Chain.Head = newNode
-		s.Chain.Tail = newNode
+		node = chain.NewNode(req.Address, nil, nil)
+		s.Chain.Head = node
+		s.Chain.Tail = node
 	} else {
 		//Add to the tail!
-		newNode = &chain.Node{Address: req.Address, Successor: nil, Predecessor: s.Chain.Tail}
-		s.Chain.Tail.Successor = newNode
-		s.Chain.Tail = newNode
+		node = chain.NewNode(req.Address, nil, s.Chain.Tail)
+		s.Chain.Tail.SetSucc(node)
+		s.Chain.Tail = node
 	}
 	s.Chain.Print()
 
-	return &protos.RegisterResponse{}, nil
+	return &protos.NeighbourInfo{}, nil
 }

@@ -7,13 +7,17 @@ message RegisterRequest {
     string address = 1;
 }
 
-message RegisterResponse {
-    string predecessor = 4;
-    string successor = 5;
+message NeighbourInfo {
+    string predecessor = 1;
+    string successor = 2;
 }
+
+message OkReponse {}
+
 
 // Node -> Master - Requesting to join the chain
 service Chain {
-    rpc Register(RegisterRequest) returns (RegisterResponse);
+    rpc Register(RegisterRequest) returns (NeighbourInfo);
+    rpc UpdateNeighbours(NeighbourInfo) returns (OkReponse);
 }
 

@@ -5,12 +5,6 @@ import (
 	"sync"
 )
 
-type Node struct {
-	Address     string
-	Successor   *Node
-	Predecessor *Node
-}
-
 // Chain - Essentially a doubly linked list structure
 type Chain struct {
 	Head *Node
@@ -18,6 +12,7 @@ type Chain struct {
 	sync.RWMutex
 }
 
+// NewChain - Create a new chain object
 func NewChain() *Chain {
 	return &Chain{}
 }
@@ -29,35 +24,41 @@ func (c *Chain) Len() int {
 	} else {
 		currentNode := c.Head
 		size := 1
-		for currentNode.Successor != nil {
-			currentNode = currentNode.Successor
+		for currentNode.successor != nil {
+			currentNode = currentNode.successor
 			size++
 		}
 		return size
 	}
 }
 
-// Print ...
+// Print - Nicely pront the current state of the chain (for debug)
 func (chain *Chain) Print() {
 	currentNode := chain.Head
 	fmt.Printf("[HEAD]")
-	for currentNode.Successor != nil {
+	for currentNode.successor != nil {
 		fmt.Printf("->(%v)", currentNode.Address)
-		currentNode = currentNode.Successor
+		currentNode = currentNode.successor
 	}
 	fmt.Printf("->(%v)", currentNode.Address)
 	fmt.Printf("[TAIL]\n")
 }
 
-// RemoveNode ...
-func (chain *Chain) RemoveNode(address string) {
-	currentNode := chain.Head
-	for currentNode.Successor != nil {
-		if currentNode.Address != address {
-			currentNode = currentNode.Successor
+// GetNode - Get a node object for the given node address
+func (chain *Chain) GetNode(address string) *Node {
+	node := chain.Head
+	for node.successor != nil {
+		if node.Address == address {
+			return node
 		}
-		currentNode.Predecessor.Successor = currentNode.Successor
-		currentNode.Successor.Predecessor = currentNode.Predecessor
-		return
+		node = node.successor
 	}
+
+	return nil
+}
+
+// RemoveNode - Delete a node from the chain (its removed through garbage collection following the pointers being updated of its neighbours)
+func (chain *Chain) RemoveNode(node *Node) {
+	node.predecessor.successor = node.successor
+	node.successor.predecessor = node.predecessor
 }

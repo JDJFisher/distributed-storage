@@ -18,8 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChainClient interface {
-	// Node -> Master - Requesting to join the chain
-	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*NeighbourInfo, error)
+	UpdateNeighbours(ctx context.Context, in *NeighbourInfo, opts ...grpc.CallOption) (*OkReponse, error)
 }
 
 type chainClient struct {
@@ -30,9 +30,18 @@ func NewChainClient(cc grpc.ClientConnInterface) ChainClient {
 	return &chainClient{cc}
 }
 
-func (c *chainClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
-	out := new(RegisterResponse)
+func (c *chainClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*NeighbourInfo, error) {
+	out := new(NeighbourInfo)
 	err := c.cc.Invoke(ctx, "/Chain/Register", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chainClient) UpdateNeighbours(ctx context.Context, in *NeighbourInfo, opts ...grpc.CallOption) (*OkReponse, error) {
+	out := new(OkReponse)
+	err := c.cc.Invoke(ctx, "/Chain/UpdateNeighbours", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +52,8 @@ func (c *chainClient) Register(ctx context.Context, in *RegisterRequest, opts ..
 // All implementations must embed UnimplementedChainServer
 // for forward compatibility
 type ChainServer interface {
-	// Node -> Master - Requesting to join the chain
-	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
+	Register(context.Context, *RegisterRequest) (*NeighbourInfo, error)
+	UpdateNeighbours(context.Context, *NeighbourInfo) (*OkReponse, error)
 	mustEmbedUnimplementedChainServer()
 }
 
@@ -52,8 +61,11 @@ type ChainServer interface {
 type UnimplementedChainServer struct {
 }
 
-func (UnimplementedChainServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
+func (UnimplementedChainServer) Register(context.Context, *RegisterRequest) (*NeighbourInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedChainServer) UpdateNeighbours(context.Context, *NeighbourInfo) (*OkReponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateNeighbours not implemented")
 }
 func (UnimplementedChainServer) mustEmbedUnimplementedChainServer() {}
 
@@ -86,6 +98,24 @@ func _Chain_Register_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Chain_UpdateNeighbours_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NeighbourInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChainServer).UpdateNeighbours(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Chain/UpdateNeighbours",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChainServer).UpdateNeighbours(ctx, req.(*NeighbourInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Chain_ServiceDesc is the grpc.ServiceDesc for Chain service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -96,6 +126,10 @@ var Chain_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Register",
 			Handler:    _Chain_Register_Handler,
+		},
+		{
+			MethodName: "UpdateNeighbours",
+			Handler:    _Chain_UpdateNeighbours_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
