@@ -47,18 +47,28 @@ func (chain *Chain) Print() {
 // GetNode - Get a node object for the given node address
 func (chain *Chain) GetNode(address string) *Node {
 	node := chain.Head
-	for node.successor != nil {
+	for {
 		if node.Address == address {
 			return node
+		} else if node.successor != nil {
+			node = node.successor
+		} else {
+			return nil
 		}
-		node = node.successor
 	}
-
-	return nil
 }
 
 // RemoveNode - Delete a node from the chain (its removed through garbage collection following the pointers being updated of its neighbours)
 func (chain *Chain) RemoveNode(node *Node) {
-	node.predecessor.successor = node.successor
-	node.successor.predecessor = node.predecessor
+	if node.predecessor != nil {
+		node.predecessor.successor = node.successor
+	} else if node == chain.Head {
+		chain.Head = node.successor
+	}
+
+	if node.successor != nil {
+		node.successor.predecessor = node.predecessor
+	} else if node == chain.Tail {
+		chain.Tail = node.predecessor
+	}
 }

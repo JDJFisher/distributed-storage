@@ -2,6 +2,7 @@ package health
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -23,7 +24,7 @@ func NewHealthServer(chain *chain.Chain) *HealthServer {
 
 // Alive (Node -> Master) - Health check ping coming from the node
 func (s *HealthServer) Alive(ctx context.Context, req *protos.HealthCheckRequest) (*protos.HealthCheckResponse, error) {
-	log.Printf("Received health check from: %s", req.Address)
+	// log.Printf("Received health check from: %s", req.Address)
 	// TODO: check if we actually care about this node, if we dont reply the node should kill itself or try to rejoin the chain
 	s.Lock()
 	defer s.Unlock()
@@ -48,19 +49,22 @@ func (s *HealthServer) CheckNodes(interval uint8) {
 
 				// Find the node in the chain
 				node := s.chain.GetNode(address)
+				fmt.Println("got the node")
 				predecessor := node.GetPred()
+				fmt.Println("yes the node")
 				successor := node.GetSucc()
+				fmt.Println("no the node")
 
 				log.Printf("Removing node %v from the chain", node.Address)
 
 				// Inform the predecessor of the dropout
 				if predecessor != nil {
-					predecessor.UpdateNeighbours(predecessor.GetPredAddress(), successor.Address)
+					predecessor.UpdateNeighbours(predecessor.GetPredAddress(), node.GetSuccAddress())
 				}
 
 				// Inform the successor of the dropout
 				if successor != nil {
-					successor.UpdateNeighbours(predecessor.Address, successor.GetSuccAddress())
+					successor.UpdateNeighbours(node.GetPredAddress(), successor.GetSuccAddress())
 				}
 
 				// Remove the node from the chain
