@@ -14,10 +14,10 @@ message NeighbourInfo {
 
 message OkReponse {}
 
-
-// Node -> Master - Requesting to join the chain
 service Chain {
+    // Node -> Master - Requesting to join the chain
     rpc Register(RegisterRequest) returns (NeighbourInfo);
+    // Master -> Node - Inform a Node of its new neighbours
     rpc UpdateNeighbours(NeighbourInfo) returns (OkReponse);
 }
 
