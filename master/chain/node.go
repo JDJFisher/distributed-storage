@@ -11,13 +11,13 @@ import (
 // Node - A server in the chain (either a head, replica or tail)
 type Node struct {
 	Address     string
-	successor   *Node
 	predecessor *Node
+	successor   *Node
 }
 
 // NewNode - Create a new node object
-func NewNode(address string, successor *Node, predecessor *Node) *Node {
-	return &Node{address, successor, predecessor}
+func NewNode(address string, predecessor *Node, successor *Node) *Node {
+	return &Node{address, predecessor, successor}
 }
 
 //Predecessor stuff
@@ -54,8 +54,9 @@ func (node *Node) SetSucc(newSucc *Node) {
 	node.successor = newSucc
 }
 
-// UpdateNeighbours - Tell a node about it's neighbour nodes changing
-func (node *Node) UpdateNeighbours(predAddress string, succAddress string) {
+// TODO - Make this method progressively go up the predecessors / successors until it finds one that is alive to udpate to (for loop on the rpc request probably)
+// UpdateNeighbours - Tell a node about it's neighbour nodes changingerror
+func (node *Node) UpdateNeighbours(predAddress string, succAddress string) error {
 	// Open a connection to the predecessor node
 	var conn *grpc.ClientConn
 	conn, err := grpc.Dial(node.Address, grpc.WithInsecure())
@@ -76,4 +77,5 @@ func (node *Node) UpdateNeighbours(predAddress string, succAddress string) {
 	if err != nil {
 		log.Fatalf("Error updating node - %v", err.Error())
 	}
+	return err
 }

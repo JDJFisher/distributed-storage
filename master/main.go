@@ -44,7 +44,7 @@ func serve(port int) {
 	protos.RegisterHealthServer(grpcServer, healthServer)
 
 	//Check the status of nodes every 5 seconds
-	go healthServer.CheckNodes(5)
+	go healthServer.CheckNodes(2)
 
 	// Start serving GRPC requests on the open tcp connection
 	log.Println("Starting master")

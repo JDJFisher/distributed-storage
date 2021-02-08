@@ -2,6 +2,7 @@ package servers
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/JDJFisher/distributed-storage/master/chain"
@@ -23,25 +24,17 @@ func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest)
 
 	// TODO: Handle if the node is already in the chain ...
 	node := s.Chain.GetNode(req.Address)
+	if node != nil {
+		fmt.Printf("Node %v is already in the network (probably hasn't been cleaned up in the health check yet)", node.Address)
+		return nil, nil
+	}
 
 	log.Printf("%s is requesting to join the network", req.Address)
 	s.Chain.Lock()
 	defer s.Chain.Unlock()
 
-	chainLen := s.Chain.Len()
-
-	// If the chain is empty we need to manually setup the node pointers
-	if chainLen == 0 {
-		node = chain.NewNode(req.Address, nil, nil)
-		s.Chain.Head = node
-		s.Chain.Tail = node
-	} else {
-		// Add to the tail!
-		node = chain.NewNode(req.Address, nil, s.Chain.Tail)
-		s.Chain.Tail.SetSucc(node)
-		s.Chain.Tail.UpdateNeighbours(s.Chain.Tail.Address, node.Address)
-		s.Chain.Tail = node
-	}
+	// Add the node to the chain
+	node = s.Chain.AddNode(req.Address)
 	s.Chain.Print()
 
 	response := &protos.NeighbourInfo{
