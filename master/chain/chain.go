@@ -29,7 +29,7 @@ func (chain *Chain) Print() {
 	}
 	fmt.Printf("(TAIL)\n")
 
-	fmt.Println("-------------------")
+	fmt.Println("---------[ Neighbour Info ]----------")
 	for _, node := range chain.nodes {
 		fmt.Printf("%v<-[%v]->%v\n", node.GetPredAddress(), node.Address, node.GetSuccAddress())
 	}

@@ -2,7 +2,6 @@ package servers
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/JDJFisher/distributed-storage/master/chain"
@@ -25,8 +24,12 @@ func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest)
 	// TODO: Handle if the node is already in the chain ...
 	node := s.Chain.GetNode(req.Address)
 	if node != nil {
-		fmt.Printf("Node %v is already in the network (probably hasn't been cleaned up in the health check yet)", node.Address)
-		return nil, nil
+		log.Printf("Node %v is attempting to join the network but appears to have not been cleaned up yet (wait for a health check and try again)\n", node.Address)
+		return &protos.NeighbourInfo{
+			Success:     false,
+			PredAddress: "",
+			SuccAddress: "",
+		}, nil
 	}
 
 	log.Printf("%s is requesting to join the network", req.Address)
@@ -38,6 +41,7 @@ func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest)
 	s.Chain.Print()
 
 	response := &protos.NeighbourInfo{
+		Success:     true,
 		PredAddress: node.GetPredAddress(),
 		SuccAddress: node.GetSuccAddress(),
 	}
