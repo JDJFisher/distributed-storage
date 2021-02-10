@@ -8,8 +8,9 @@ message RegisterRequest {
 }
 
 message NeighbourInfo {
-    string predAddress = 1;
-    string succAddress = 2;
+    bool success = 1;
+    string predAddress = 2;
+    string succAddress = 3;
 }
 
 message OkReponse {}

@@ -23,28 +23,25 @@ func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest)
 
 	// TODO: Handle if the node is already in the chain ...
 	node := s.Chain.GetNode(req.Address)
+	if node != nil {
+		log.Printf("Node %v is attempting to join the network but appears to have not been cleaned up yet (wait for a health check and try again)\n", node.Address)
+		return &protos.NeighbourInfo{
+			Success:     false,
+			PredAddress: "",
+			SuccAddress: "",
+		}, nil
+	}
 
 	log.Printf("%s is requesting to join the network", req.Address)
 	s.Chain.Lock()
 	defer s.Chain.Unlock()
 
-	chainLen := s.Chain.Len()
-
-	// If the chain is empty we need to manually setup the node pointers
-	if chainLen == 0 {
-		node = chain.NewNode(req.Address, nil, nil)
-		s.Chain.Head = node
-		s.Chain.Tail = node
-	} else {
-		// Add to the tail!
-		node = chain.NewNode(req.Address, nil, s.Chain.Tail)
-		s.Chain.Tail.SetSucc(node)
-		s.Chain.Tail.UpdateNeighbours(s.Chain.Tail.Address, node.Address)
-		s.Chain.Tail = node
-	}
+	// Add the node to the chain
+	node = s.Chain.AddNode(req.Address)
 	s.Chain.Print()
 
 	response := &protos.NeighbourInfo{
+		Success:     true,
 		PredAddress: node.GetPredAddress(),
 		SuccAddress: node.GetSuccAddress(),
 	}

@@ -46,9 +46,20 @@ func main() {
 		request := &protos.RegisterRequest{Address: os.Getenv("address")}
 		response, err := chainClient.Register(context.Background(), request)
 
+		log.Printf("Response to join the network: %v", response.Success)
+
+		//Not allowed to join the network (probably health check related)
+		if !response.Success {
+			log.Println("Unsuccessful in joining the network, will retry")
+			time.Sleep(3 * time.Second)
+			log.Printf("Trying to join the network again")
+			continue
+		}
+
+		//Actual error joining the network
 		if err != nil {
-			log.Fatalf("Error joining the chain network - %v", err.Error())
-			time.Sleep(5 * time.Second)
+			log.Printf("Error joining the chain network - %v (retrying in 3 seconds)", err.Error())
+			time.Sleep(3 * time.Second)
 			continue
 		}
 

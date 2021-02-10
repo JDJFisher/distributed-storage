@@ -7,8 +7,7 @@ import (
 
 // Chain - Essentially a doubly linked list structure
 type Chain struct {
-	Head *Node
-	Tail *Node
+	nodes []*Node
 	sync.RWMutex
 }
 
@@ -19,56 +18,117 @@ func NewChain() *Chain {
 
 // Len - The length of the chain (the number of nodes within the chain)
 func (c *Chain) Len() int {
-	if c.Head == nil {
-		return 0
-	} else {
-		currentNode := c.Head
-		size := 1
-		for currentNode.successor != nil {
-			currentNode = currentNode.successor
-			size++
-		}
-		return size
-	}
+	return len(c.nodes)
 }
 
 // Print - Nicely pront the current state of the chain (for debug)
 func (chain *Chain) Print() {
-	currentNode := chain.Head
-	fmt.Printf("[HEAD]")
-	for currentNode.successor != nil {
-		fmt.Printf("->(%v)", currentNode.Address)
-		currentNode = currentNode.successor
+	fmt.Printf("(HEAD)")
+	for _, node := range chain.nodes {
+		fmt.Printf("[%v]->", node.Address)
 	}
-	fmt.Printf("->(%v)", currentNode.Address)
-	fmt.Printf("[TAIL]\n")
+	fmt.Printf("(TAIL)\n")
+
+	fmt.Println("---------[ Neighbour Info ]----------")
+	for _, node := range chain.nodes {
+		fmt.Printf("%v<-[%v]->%v\n", node.GetPredAddress(), node.Address, node.GetSuccAddress())
+	}
+	fmt.Println("-------------------")
 }
 
-// GetNode - Get a node object for the given node address
-func (chain *Chain) GetNode(address string) *Node {
-	node := chain.Head
-	for {
-		if node == nil {
-			return nil
-		} else if node.Address == address {
-			return node
-		} else {
-			node = node.successor
+// GetHead -
+func (chain *Chain) GetHead() *Node {
+	return chain.nodes[0]
+}
+
+// GetHeadAddress -
+func (chain *Chain) GetHeadAddress() string {
+	head := chain.GetHead()
+	if head != nil {
+		return head.Address
+	}
+	return ""
+}
+
+// GetTail -
+func (chain *Chain) GetTail() *Node {
+	l := len(chain.nodes)
+	if l > 0 {
+		return chain.nodes[l-1]
+	}
+	return nil
+}
+
+// GetTailAddress -
+func (chain *Chain) GetTailAddress() string {
+	tail := chain.GetTail()
+	if tail != nil {
+		return tail.Address
+	}
+	return ""
+}
+
+// GetNodeIndex - ...
+func (chain *Chain) GetNodeIndex(address string) int {
+	for i, node := range chain.nodes {
+		if node.Address == address {
+			return i
 		}
 	}
+	return -1
 }
 
-// RemoveNode - Delete a node from the chain (its removed through garbage collection following the pointers being updated of its neighbours)
-func (chain *Chain) RemoveNode(node *Node) {
-	if node.predecessor != nil {
-		node.predecessor.successor = node.successor
-	} else if node == chain.Head {
-		chain.Head = node.successor
+// GetNode - ...
+func (chain *Chain) GetNode(address string) *Node {
+	for _, node := range chain.nodes {
+		if node.Address == address {
+			return node
+		}
+	}
+	return nil
+}
+
+// AddNode - ...
+func (chain *Chain) AddNode(address string) *Node {
+	tail := chain.GetTail()
+	node := NewNode(address, tail, nil)
+
+	if tail != nil {
+		tail.SetSucc(node)
 	}
 
-	if node.successor != nil {
-		node.successor.predecessor = node.predecessor
-	} else if node == chain.Tail {
-		chain.Tail = node.predecessor
+	chain.nodes = append(chain.nodes, node)
+	return node
+}
+
+// RemoveNode - ...
+func (chain *Chain) RemoveNode(address string) {
+	i := chain.GetNodeIndex(address)
+	if i != -1 {
+		chain.nodes = append(chain.nodes[:i], chain.nodes[i+1:]...)
 	}
+}
+
+// Fix - Attempt to fix the chain
+func (chain *Chain) Fix() error {
+	for i, node := range chain.nodes {
+		if i == 0 {
+			node.SetPred(nil)
+		} else {
+			node.SetPred(chain.nodes[i-1])
+		}
+
+		if i == chain.Len()-1 {
+			node.SetSucc(nil)
+		} else {
+			node.SetSucc(chain.nodes[i+1])
+		}
+
+		err := node.UpdateNeighbours(node.GetPredAddress(), node.GetSuccAddress())
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

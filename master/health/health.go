@@ -39,35 +39,26 @@ func (s *HealthServer) CheckNodes(interval uint8) {
 	for {
 		<-time.After(time.Duration(interval) * time.Second)
 		now := time.Now()
+		failure := false
+
+		// Iterate over ...
 		for address, latestTime := range s.monitoredNodes {
 			if now.Sub(latestTime).Seconds() > float64(interval) {
-				log.Printf("Node %s hasnt sent a health check within %d seconds!", address, interval)
-
 				// Remove it from the monitored nodes when it dies
+				log.Printf("Node %s hasnt sent a health check within %d seconds!", address, interval)
 				delete(s.monitoredNodes, address)
-
-				// Find the node in the chain
-				node := s.chain.GetNode(address)
-				predecessor := node.GetPred()
-				successor := node.GetSucc()
-
-				log.Printf("Removing node %v from the chain", node.Address)
-
-				// Inform the predecessor of the dropout
-				if predecessor != nil {
-					predecessor.UpdateNeighbours(predecessor.GetPredAddress(), node.GetSuccAddress())
-				}
-
-				// Inform the successor of the dropout
-				if successor != nil {
-					successor.UpdateNeighbours(node.GetPredAddress(), successor.GetSuccAddress())
-				}
+				failure = true
 
 				// Remove the node from the chain
-				s.chain.RemoveNode(node)
-
-				s.chain.Print()
+				log.Printf("Removing node %v from the chain", address)
+				s.chain.RemoveNode(address)
 			}
+		}
+
+		// Attempt to fix the chain after node removal
+		if failure {
+			s.chain.Fix()
+			s.chain.Print()
 		}
 	}
 }
