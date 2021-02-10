@@ -55,7 +55,7 @@ func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*p
 	// Different grpc connection info depending on if it's running in docker or not
 	grpcHost := ":7000"
 	if os.Getenv("docker") == "true" {
-		grpcHost = s.Chain.GetHead().Address
+		grpcHost = s.Chain.GetHeadAddress()
 	}
 
 	// Open a connection to the head node
