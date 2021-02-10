@@ -89,16 +89,20 @@ func (chain *Chain) GetNode(address string) *Node {
 }
 
 // AddNode - ...
-func (chain *Chain) AddNode(address string) *Node {
+func (chain *Chain) AddNode(address string) (*Node, error) {
 	tail := chain.GetTail()
 	node := NewNode(address, tail, nil)
 
 	if tail != nil {
 		tail.SetSucc(node)
+		err := tail.UpdateNeighbours(tail.GetPredAddress(), address)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	chain.nodes = append(chain.nodes, node)
-	return node
+	return node, nil
 }
 
 // RemoveNode - ...

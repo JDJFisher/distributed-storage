@@ -36,8 +36,8 @@ func (s *ChainServer) Register(ctx context.Context, req *protos.RegisterRequest)
 	s.Chain.Lock()
 	defer s.Chain.Unlock()
 
-	// Add the node to the chain
-	node = s.Chain.AddNode(req.Address)
+	// Add the node to the chain TODO: Handle error
+	node, _ = s.Chain.AddNode(req.Address)
 	s.Chain.Print()
 
 	response := &protos.NeighbourInfo{

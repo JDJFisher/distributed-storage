@@ -23,8 +23,6 @@ func NewStorageServer(neighbours *Neighbours, cache *cache.Cache) *StorageServer
 
 // Read - ...
 func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*protos.ReadResponse, error) {
-	// TODO: Only serve if assigned a role in the chain
-
 	value, found := s.Cache.Get(req.Key)
 
 	if found {
@@ -36,8 +34,9 @@ func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*pro
 
 // Write - ...
 func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*protos.WriteResponse, error) {
-	// TODO: Only serve if assigned a role in the chain
-	// TODO: Process value
+
+	// Pending - for each objectid it has its own "queue" of pending requests
+	// Sent - Requests forwarded but not yet ack'd by the successor (coming back from the tail)
 
 	s.Cache.Set(req.Key, req.Value, cache.NoExpiration)
 

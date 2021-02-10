@@ -3,7 +3,6 @@ package servers
 import (
 	"context"
 	"log"
-	"os"
 
 	"github.com/JDJFisher/distributed-storage/master/chain"
 	"github.com/JDJFisher/distributed-storage/protos"
@@ -23,11 +22,7 @@ func NewStorageServer(chain *chain.Chain) *StorageServer {
 func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*protos.ReadResponse, error) {
 	log.Println("Received a read request")
 
-	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":7000"
-	if os.Getenv("docker") == "true" {
-		grpcHost = s.Chain.GetTailAddress()
-	}
+	grpcHost := s.Chain.GetTailAddress()
 
 	// Open a connection to the tail node
 	var conn *grpc.ClientConn
@@ -52,11 +47,7 @@ func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*pro
 func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*protos.WriteResponse, error) {
 	log.Println("Received a write request")
 
-	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":7000"
-	if os.Getenv("docker") == "true" {
-		grpcHost = s.Chain.GetHeadAddress()
-	}
+	grpcHost := s.Chain.GetHeadAddress()
 
 	// Open a connection to the head node
 	var conn *grpc.ClientConn
