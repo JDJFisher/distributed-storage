@@ -19,7 +19,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StorageClient interface {
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ReadResponse, error)
-	Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*WriteResponse, error)
+	Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*OkResponse, error)
+	Processed(ctx context.Context, in *ProcessedRequest, opts ...grpc.CallOption) (*OkResponse, error)
+	Persist(ctx context.Context, in *ProcessedRequest, opts ...grpc.CallOption) (*OkResponse, error)
 }
 
 type storageClient struct {
@@ -32,16 +34,34 @@ func NewStorageClient(cc grpc.ClientConnInterface) StorageClient {
 
 func (c *storageClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ReadResponse, error) {
 	out := new(ReadResponse)
-	err := c.cc.Invoke(ctx, "/Storage/read", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/protos.Storage/read", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *storageClient) Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*WriteResponse, error) {
-	out := new(WriteResponse)
-	err := c.cc.Invoke(ctx, "/Storage/write", in, out, opts...)
+func (c *storageClient) Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*OkResponse, error) {
+	out := new(OkResponse)
+	err := c.cc.Invoke(ctx, "/protos.Storage/write", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageClient) Processed(ctx context.Context, in *ProcessedRequest, opts ...grpc.CallOption) (*OkResponse, error) {
+	out := new(OkResponse)
+	err := c.cc.Invoke(ctx, "/protos.Storage/processed", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageClient) Persist(ctx context.Context, in *ProcessedRequest, opts ...grpc.CallOption) (*OkResponse, error) {
+	out := new(OkResponse)
+	err := c.cc.Invoke(ctx, "/protos.Storage/persist", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +73,9 @@ func (c *storageClient) Write(ctx context.Context, in *WriteRequest, opts ...grp
 // for forward compatibility
 type StorageServer interface {
 	Read(context.Context, *ReadRequest) (*ReadResponse, error)
-	Write(context.Context, *WriteRequest) (*WriteResponse, error)
+	Write(context.Context, *WriteRequest) (*OkResponse, error)
+	Processed(context.Context, *ProcessedRequest) (*OkResponse, error)
+	Persist(context.Context, *ProcessedRequest) (*OkResponse, error)
 	mustEmbedUnimplementedStorageServer()
 }
 
@@ -64,8 +86,14 @@ type UnimplementedStorageServer struct {
 func (UnimplementedStorageServer) Read(context.Context, *ReadRequest) (*ReadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
-func (UnimplementedStorageServer) Write(context.Context, *WriteRequest) (*WriteResponse, error) {
+func (UnimplementedStorageServer) Write(context.Context, *WriteRequest) (*OkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
+}
+func (UnimplementedStorageServer) Processed(context.Context, *ProcessedRequest) (*OkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Processed not implemented")
+}
+func (UnimplementedStorageServer) Persist(context.Context, *ProcessedRequest) (*OkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Persist not implemented")
 }
 func (UnimplementedStorageServer) mustEmbedUnimplementedStorageServer() {}
 
@@ -90,7 +118,7 @@ func _Storage_Read_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Storage/read",
+		FullMethod: "/protos.Storage/read",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StorageServer).Read(ctx, req.(*ReadRequest))
@@ -108,10 +136,46 @@ func _Storage_Write_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Storage/write",
+		FullMethod: "/protos.Storage/write",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StorageServer).Write(ctx, req.(*WriteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Storage_Processed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProcessedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).Processed(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protos.Storage/processed",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).Processed(ctx, req.(*ProcessedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Storage_Persist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProcessedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).Persist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protos.Storage/persist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).Persist(ctx, req.(*ProcessedRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -120,7 +184,7 @@ func _Storage_Write_Handler(srv interface{}, ctx context.Context, dec func(inter
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Storage_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Storage",
+	ServiceName: "protos.Storage",
 	HandlerType: (*StorageServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -130,6 +194,14 @@ var Storage_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "write",
 			Handler:    _Storage_Write_Handler,
+		},
+		{
+			MethodName: "processed",
+			Handler:    _Storage_Processed_Handler,
+		},
+		{
+			MethodName: "persist",
+			Handler:    _Storage_Persist_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

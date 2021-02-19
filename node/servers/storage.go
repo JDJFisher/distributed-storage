@@ -6,6 +6,7 @@ import (
 
 	"github.com/JDJFisher/distributed-storage/protos"
 	"github.com/patrickmn/go-cache"
+	uuid "github.com/satori/go.uuid"
 	"google.golang.org/grpc"
 )
 
@@ -14,11 +15,16 @@ type StorageServer struct {
 	protos.UnimplementedStorageServer
 	Neighbours *Neighbours
 	Cache      *cache.Cache
+	Staging    map[uuid.UUID]*protos.WriteRequest
 }
 
 // NewStorageServer - Create a new storage server object
 func NewStorageServer(neighbours *Neighbours, cache *cache.Cache) *StorageServer {
-	return &StorageServer{Neighbours: neighbours, Cache: cache}
+	return &StorageServer{
+		Neighbours: neighbours,
+		Cache:      cache,
+		Staging:    make(map[uuid.UUID]*protos.WriteRequest),
+	}
 }
 
 // Read - ...
@@ -33,35 +39,69 @@ func (s *StorageServer) Read(ctx context.Context, req *protos.ReadRequest) (*pro
 }
 
 // Write - ...
-func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*protos.WriteResponse, error) {
+func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*protos.OkResponse, error) {
+	//
+	uid, _ := uuid.FromString(req.Uuid)
 
-	// Pending - for each objectid it has its own "queue" of pending requests
-	// Sent - Requests forwarded but not yet ack'd by the successor (coming back from the tail)
+	// Stage the write
+	s.Staging[uid] = req
 
-	s.Cache.Set(req.Key, req.Value, cache.NoExpiration)
+	var grpcHost string
 
-	// Propagate the write request down the chain
-	if s.Neighbours.SuccAddress != "" {
+	// Determine host based on if tail
+	if s.Neighbours.SuccAddress == "" {
+		grpcHost = "master:6000"
+	} else {
+		grpcHost = s.Neighbours.SuccAddress
+	}
 
-		// Open a connection to the successor node
-		var conn *grpc.ClientConn
-		conn, err := grpc.Dial(s.Neighbours.SuccAddress, grpc.WithInsecure())
+	// Open a connection
+	var conn *grpc.ClientConn
+	conn, err := grpc.Dial(grpcHost, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Error connecting - %v", err.Error())
+	}
+	defer conn.Close()
+
+	// Create storage client
+	storageClient := protos.NewStorageClient(conn)
+
+	if s.Neighbours.SuccAddress == "" {
+
+		// Persist the write to the replica
+		s.Cache.Set(req.Key, req.Value, cache.NoExpiration)
+
+		// Response to the master
+		req := &protos.ProcessedRequest{Uuid: uid.String()}
+		_, err = storageClient.Processed(context.Background(), req)
 		if err != nil {
-			log.Fatalf("Error connecting to successor node - %v", err.Error())
+			log.Fatalf("Error ... to the master - %v", err.Error())
 		}
-		defer conn.Close()
 
-		// Create storage client
-		storageClient := protos.NewStorageClient(conn)
-
-		// Forward write request to successor
-		response, err := storageClient.Write(context.Background(), req)
+	} else {
+		// Propagate the write request down the chain
+		_, err = storageClient.Write(context.Background(), req)
 		if err != nil {
 			log.Fatalf("Error forwarding write request to successor node - %v", err.Error())
 		}
-
-		return response, nil
 	}
 
-	return &protos.WriteResponse{Value: req.Value}, nil
+	return &protos.OkResponse{}, nil
+}
+
+//
+func (s *StorageServer) Persist(ctx context.Context, req *protos.ProcessedRequest) (*protos.OkResponse, error) {
+	//
+	uid, _ := uuid.FromString(req.Uuid)
+
+	//
+	r := s.Staging[uid]
+
+	// Persist the write to the replica
+	s.Cache.Set(r.Key, r.Value, cache.NoExpiration)
+
+	//
+	delete(s.Staging, uid)
+
+	return &protos.OkResponse{}, nil
 }

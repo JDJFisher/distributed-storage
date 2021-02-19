@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HealthClient interface {
+	// Node -> Master - Tell the Master that the node is still alive
 	Alive(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
@@ -42,6 +43,7 @@ func (c *healthClient) Alive(ctx context.Context, in *HealthCheckRequest, opts .
 // All implementations must embed UnimplementedHealthServer
 // for forward compatibility
 type HealthServer interface {
+	// Node -> Master - Tell the Master that the node is still alive
 	Alive(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedHealthServer()
 }

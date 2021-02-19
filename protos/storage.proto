@@ -1,6 +1,7 @@
 syntax = "proto3";
+package protos;
 option go_package = "github.com/JDJFisher/distributed-storage/protos";
-// import "google/protobuf/any.proto";
+import "protos/common.proto";
 
 message ReadRequest {
   string key = 1;
@@ -9,18 +10,22 @@ message ReadRequest {
 message WriteRequest {
   string key = 1;
   string value = 2;
+  string uuid = 3;
+}
+
+message ProcessedRequest {
+  string uuid = 1;
 }
 
 message ReadResponse {
   string value = 1;
 }
 
-message WriteResponse {
-  string value = 1;
-}
 
 service Storage {
     rpc read(ReadRequest) returns (ReadResponse);
-    rpc write(WriteRequest) returns (WriteResponse);
+    rpc write(WriteRequest) returns (OkResponse);
+    rpc processed(ProcessedRequest) returns (OkResponse);
+    rpc persist(ProcessedRequest) returns (OkResponse);
 }
 

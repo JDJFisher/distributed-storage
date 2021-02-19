@@ -1,6 +1,7 @@
 syntax = "proto3";
-
+package protos;
 option go_package = "github.com/JDJFisher/distributed-storage/protos";
+import "protos/common.proto";
 
 // Provide the name of the service which is joining (docker service name), allows the network to then send messages back by using the docker DNS
 message RegisterRequest {
@@ -13,12 +14,11 @@ message NeighbourInfo {
     string succAddress = 3;
 }
 
-message OkReponse {}
 
 service Chain {
     // Node -> Master - Requesting to join the chain
     rpc Register(RegisterRequest) returns (NeighbourInfo);
     // Master -> Node - Inform a Node of its new neighbours
-    rpc UpdateNeighbours(NeighbourInfo) returns (OkReponse);
+    rpc UpdateNeighbours(NeighbourInfo) returns (OkResponse);
 }
 

@@ -49,16 +49,16 @@ func fake(storageClient protos.StorageClient) {
 		// Wait ...
 		time.Sleep(2 * time.Second)
 
-		switch request.(type) {
+		switch request := request.(type) {
 		// Panic
 		default:
 			log.Panicln("Unexpected request type")
 
 		// Fake a read
 		case *protos.ReadRequest:
-			log.Printf("Dispatching read %v: %v", i, request.(*protos.ReadRequest).Key)
+			log.Printf("Dispatching read %v: %v", i, request.Key)
 
-			response, err := storageClient.Read(context.Background(), request.(*protos.ReadRequest))
+			response, err := storageClient.Read(context.Background(), request)
 
 			if err != nil {
 				log.Fatalf("Failed read %v: %v", i, err.Error())
@@ -68,14 +68,14 @@ func fake(storageClient protos.StorageClient) {
 
 		// Fake a write
 		case *protos.WriteRequest:
-			log.Printf("Dispatching write %v: %v->%v", i, request.(*protos.WriteRequest).Key, request.(*protos.WriteRequest).Value)
+			log.Printf("Dispatching write %v: %v->%v", i, request.Key, request.Value)
 
-			response, err := storageClient.Write(context.Background(), request.(*protos.WriteRequest))
+			_, err := storageClient.Write(context.Background(), request)
 
 			if err != nil {
 				log.Fatalf("Failed write %v: %v", i, err.Error())
 			} else {
-				log.Printf("Recieved response %v: %v", i, response.Value)
+				log.Printf("Recieved response %v", i)
 			}
 		}
 	}
