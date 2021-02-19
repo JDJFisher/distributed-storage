@@ -24,8 +24,8 @@ func NewChainServer(neighbours *Neighbours) *ChainServer {
 }
 
 // UpdateNeighbours - ...
-func (s *ChainServer) UpdateNeighbours(ctx context.Context, req *protos.NeighbourInfo) (*protos.OkReponse, error) {
+func (s *ChainServer) UpdateNeighbours(ctx context.Context, req *protos.NeighbourInfo) (*protos.OkResponse, error) {
 	s.Neighbours.PredAddress = req.PredAddress
 	s.Neighbours.SuccAddress = req.SuccAddress
-	return &protos.OkReponse{}, nil
+	return &protos.OkResponse{}, nil
 }

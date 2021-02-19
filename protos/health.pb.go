@@ -28,8 +28,8 @@ const _ = proto.ProtoPackageIsVersion4
 type HealthCheckResponse_ServingStatus int32
 
 const (
-	HealthCheckResponse_WAITING HealthCheckResponse_ServingStatus = 0 //Waiting to receive instructions from the master
-	HealthCheckResponse_SERVING HealthCheckResponse_ServingStatus = 1 //Serving requests / responses
+	HealthCheckResponse_WAITING HealthCheckResponse_ServingStatus = 0 // Waiting to receive instructions from the master
+	HealthCheckResponse_SERVING HealthCheckResponse_ServingStatus = 1 // Servicing requests
 )
 
 // Enum value maps for HealthCheckResponse_ServingStatus.

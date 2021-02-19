@@ -9,4 +9,4 @@ proto:
 
 clean:
 	rm -f protos/*.pb.go
-	docker-compose rm -f
+	# docker-compose rm -f

@@ -22,15 +22,9 @@ func main() {
 		port = 7000
 	}
 
-	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":6000"
-	if os.Getenv("docker") == "true" {
-		grpcHost = "master" + grpcHost
-	}
-
 	// Create GRPC client
 	var conn *grpc.ClientConn
-	conn, err = grpc.Dial(grpcHost, grpc.WithInsecure())
+	conn, err = grpc.Dial("master:6000", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to the master - %v", err.Error())
 	}
