@@ -21,11 +21,20 @@ message ReadResponse {
   string value = 1;
 }
 
+message RequestData {
+}
+
+message RequestDataResponse {
+  string key = 1;
+  string value = 2;
+}
 
 service Storage {
     rpc read(ReadRequest) returns (ReadResponse);
     rpc write(WriteRequest) returns (OkResponse);
     rpc processed(ProcessedRequest) returns (OkResponse);
     rpc persist(ProcessedRequest) returns (OkResponse);
+
+    rpc GetTailData(RequestData) returns (stream RequestDataResponse) {};
 }
 

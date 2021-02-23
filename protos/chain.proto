@@ -3,21 +3,30 @@ package protos;
 option go_package = "github.com/JDJFisher/distributed-storage/protos";
 import "protos/common.proto";
 
-// Provide the name of the service which is joining (docker service name), allows the network to then send messages back by using the docker DNS
-message RegisterRequest {
+message TailRequest {
+}
+
+message TailResponse {
     string address = 1;
 }
 
-message NeighbourInfo {
-    bool success = 1;
-    string predAddress = 2;
-    string succAddress = 3;
+message JoinRequest {
+    string address = 1;
+    string tailAddress = 2;
 }
 
+message NeighbourInfo {
+    string predAddress = 1;
+    string succAddress = 2;
+}
 
 service Chain {
-    // Node -> Master - Requesting to join the chain
-    rpc Register(RegisterRequest) returns (NeighbourInfo);
+    // Node -> Master - Request the tail of the chain to determine whether the node needs to replicate data before joining
+    rpc GetTail(TailRequest) returns (TailResponse);
+
+    // Node -> Master - We have the data, let's join the chain
+    rpc Join(JoinRequest) returns (OkResponse);
+
     // Master -> Node - Inform a Node of its new neighbours
     rpc UpdateNeighbours(NeighbourInfo) returns (OkResponse);
 }

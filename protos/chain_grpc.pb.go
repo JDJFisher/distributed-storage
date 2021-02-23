@@ -18,8 +18,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChainClient interface {
-	// Node -> Master - Requesting to join the chain
-	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*NeighbourInfo, error)
+	// Node -> Master - Request the tail of the chain to determine whether the node needs to replicate data before joining
+	GetTail(ctx context.Context, in *TailRequest, opts ...grpc.CallOption) (*TailResponse, error)
+	// Node -> Master - We have the data, let's join the chain
+	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*OkResponse, error)
 	// Master -> Node - Inform a Node of its new neighbours
 	UpdateNeighbours(ctx context.Context, in *NeighbourInfo, opts ...grpc.CallOption) (*OkResponse, error)
 }
@@ -32,9 +34,18 @@ func NewChainClient(cc grpc.ClientConnInterface) ChainClient {
 	return &chainClient{cc}
 }
 
-func (c *chainClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*NeighbourInfo, error) {
-	out := new(NeighbourInfo)
-	err := c.cc.Invoke(ctx, "/protos.Chain/Register", in, out, opts...)
+func (c *chainClient) GetTail(ctx context.Context, in *TailRequest, opts ...grpc.CallOption) (*TailResponse, error) {
+	out := new(TailResponse)
+	err := c.cc.Invoke(ctx, "/protos.Chain/GetTail", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chainClient) Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*OkResponse, error) {
+	out := new(OkResponse)
+	err := c.cc.Invoke(ctx, "/protos.Chain/Join", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +65,10 @@ func (c *chainClient) UpdateNeighbours(ctx context.Context, in *NeighbourInfo, o
 // All implementations must embed UnimplementedChainServer
 // for forward compatibility
 type ChainServer interface {
-	// Node -> Master - Requesting to join the chain
-	Register(context.Context, *RegisterRequest) (*NeighbourInfo, error)
+	// Node -> Master - Request the tail of the chain to determine whether the node needs to replicate data before joining
+	GetTail(context.Context, *TailRequest) (*TailResponse, error)
+	// Node -> Master - We have the data, let's join the chain
+	Join(context.Context, *JoinRequest) (*OkResponse, error)
 	// Master -> Node - Inform a Node of its new neighbours
 	UpdateNeighbours(context.Context, *NeighbourInfo) (*OkResponse, error)
 	mustEmbedUnimplementedChainServer()
@@ -65,8 +78,11 @@ type ChainServer interface {
 type UnimplementedChainServer struct {
 }
 
-func (UnimplementedChainServer) Register(context.Context, *RegisterRequest) (*NeighbourInfo, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+func (UnimplementedChainServer) GetTail(context.Context, *TailRequest) (*TailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTail not implemented")
+}
+func (UnimplementedChainServer) Join(context.Context, *JoinRequest) (*OkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Join not implemented")
 }
 func (UnimplementedChainServer) UpdateNeighbours(context.Context, *NeighbourInfo) (*OkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateNeighbours not implemented")
@@ -84,20 +100,38 @@ func RegisterChainServer(s grpc.ServiceRegistrar, srv ChainServer) {
 	s.RegisterService(&Chain_ServiceDesc, srv)
 }
 
-func _Chain_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterRequest)
+func _Chain_GetTail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChainServer).Register(ctx, in)
+		return srv.(ChainServer).GetTail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.Chain/Register",
+		FullMethod: "/protos.Chain/GetTail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChainServer).Register(ctx, req.(*RegisterRequest))
+		return srv.(ChainServer).GetTail(ctx, req.(*TailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chain_Join_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChainServer).Join(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protos.Chain/Join",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChainServer).Join(ctx, req.(*JoinRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -128,8 +162,12 @@ var Chain_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ChainServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Register",
-			Handler:    _Chain_Register_Handler,
+			MethodName: "GetTail",
+			Handler:    _Chain_GetTail_Handler,
+		},
+		{
+			MethodName: "Join",
+			Handler:    _Chain_Join_Handler,
 		},
 		{
 			MethodName: "UpdateNeighbours",

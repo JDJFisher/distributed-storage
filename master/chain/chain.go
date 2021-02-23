@@ -41,7 +41,10 @@ func (chain *Chain) Print() {
 
 // GetHead -
 func (chain *Chain) GetHead() *Node {
-	return chain.Nodes[0]
+	if chain.Len() >= 1 {
+		return chain.Nodes[0]
+	}
+	return nil
 }
 
 // GetHeadAddress -

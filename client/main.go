@@ -36,12 +36,12 @@ func fake(storageClient protos.StorageClient) {
 
 	// Declare dummy requests
 	var dummyRequests = [...]interface{}{
-		&protos.WriteRequest{Key: "alpha", Value: "foo"},
-		&protos.ReadRequest{Key: "alpha"},
-		&protos.WriteRequest{Key: "alpha", Value: "bar"},
-		&protos.WriteRequest{Key: "beta", Value: "baz"},
-		&protos.ReadRequest{Key: "alpha"},
-		&protos.ReadRequest{Key: "beta"},
+		// &protos.WriteRequest{Key: "alpha", Value: "foo"},
+		// &protos.ReadRequest{Key: "alpha"},
+		// &protos.WriteRequest{Key: "alpha", Value: "bar"},
+		// &protos.WriteRequest{Key: "beta", Value: "baz"},
+		// &protos.ReadRequest{Key: "alpha"},
+		// &protos.ReadRequest{Key: "beta"},
 	}
 
 	// Loop over dummy requests
