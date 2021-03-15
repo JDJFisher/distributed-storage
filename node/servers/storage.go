@@ -112,8 +112,10 @@ func (s *StorageServer) GetTailData(req *protos.RequestData, stream protos.Stora
 	// TODO: Clear the queue
 
 	for k, v := range s.Cache.Items() {
-		log.Printf("Sending k:%s v:%s to the new node", k, v.Object.(string))
-		if err := stream.Send(&protos.RequestDataResponse{Key: k, Value: v.Object.(string)}); err != nil {
+		log.Printf("Sending %s: %s to the new node", k, v.Object.(string))
+		data := &protos.RequestDataResponse{Key: k, Value: v.Object.(string)}
+
+		if err := stream.Send(data); err != nil {
 			log.Fatalf("Error sending key value to the new node - %v", err.Error())
 		}
 	}

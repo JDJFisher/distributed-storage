@@ -15,6 +15,38 @@ import (
 	"google.golang.org/grpc"
 )
 
+type MyStorageClient struct {
+	client protos.StorageClient
+}
+
+func NewSpecialStorageClient(conn grpc.ClientConnInterface) MyStorageClient {
+	return MyStorageClient{client: protos.NewStorageClient(conn)}
+}
+
+func (c MyStorageClient) GetTailData(ctx context.Context, ca *cache.Cache) error {
+	log.Println("do you even get called?")
+	stream, err := c.client.GetTailData(context.Background(), &protos.RequestData{})
+	if err != nil {
+		log.Fatalf("Error getting the tail data - %v", err.Error())
+	}
+	for {
+		log.Println("Running client loop")
+		item, err := stream.Recv()
+		if err == io.EOF {
+			log.Println("Received all data from the tail")
+			break
+		} else if err != nil {
+			log.Fatalf("Error receiving key data from tail whilst getting data - %v", err.Error())
+		}
+		// Add the key value pair to the cache locally.
+		log.Printf("Writing %s: %s", item.Key, item.Value)
+		ca.Set(item.Key, item.Value, cache.NoExpiration)
+	}
+	log.Println("bye")
+
+	return nil
+}
+
 func main() {
 	// Determine port number
 	port, err := strconv.Atoi(os.Getenv("port"))
@@ -58,23 +90,11 @@ func main() {
 			defer tailConn.Close()
 
 			// Create Chain client
-			tailClient := protos.NewStorageClient(tailConn)
-			stream, err := tailClient.GetTailData(context.Background(), &protos.RequestData{})
-			if err != nil {
-				log.Fatalf("Error getting the tail data - %v", err.Error())
-			}
-			for {
-				keyValue, err := stream.Recv()
-				if err == io.EOF {
-					break
-				}
-				if err != nil {
-					log.Fatalf("Error receiving key data from tail whilst getting data - %v", err.Error())
-				}
-				//Add the key value pair to the cache locally.
-				c.Set(keyValue.Key, keyValue.Value, cache.NoExpiration)
-				log.Printf("Writing k:%s -> v:%s", keyValue.Key, keyValue.Value)
-			}
+			// tailClient := protos.NewStorageClient(tailConn)
+
+			tailClient := NewSpecialStorageClient(tailConn)
+			_ = tailClient.GetTailData(context.Background(), c)
+
 		}
 
 		// JOIN
@@ -86,7 +106,7 @@ func main() {
 		_, err = chainClient.Join(context.Background(), request)
 
 		if err != nil {
-			// ...
+			log.Println("find in folder this error because its secretive")
 			continue
 		}
 
