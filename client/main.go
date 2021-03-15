@@ -44,10 +44,12 @@ func fake(storageClient protos.StorageClient) {
 		&protos.ReadRequest{Key: "beta"},
 	}
 
+	time.Sleep(2 * time.Second)
+
 	// Loop over dummy requests
 	for i, request := range dummyRequests {
 		// Wait ...
-		time.Sleep(2 * time.Second)
+		// time.Sleep(2 * time.Second)
 
 		switch request := request.(type) {
 		// Panic

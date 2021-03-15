@@ -22,6 +22,7 @@ type StorageClient interface {
 	Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*OkResponse, error)
 	Processed(ctx context.Context, in *ProcessedRequest, opts ...grpc.CallOption) (*OkResponse, error)
 	Persist(ctx context.Context, in *ProcessedRequest, opts ...grpc.CallOption) (*OkResponse, error)
+	GetTailData(ctx context.Context, in *RequestData, opts ...grpc.CallOption) (Storage_GetTailDataClient, error)
 }
 
 type storageClient struct {
@@ -68,6 +69,38 @@ func (c *storageClient) Persist(ctx context.Context, in *ProcessedRequest, opts 
 	return out, nil
 }
 
+func (c *storageClient) GetTailData(ctx context.Context, in *RequestData, opts ...grpc.CallOption) (Storage_GetTailDataClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Storage_ServiceDesc.Streams[0], "/protos.Storage/GetTailData", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &storageGetTailDataClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Storage_GetTailDataClient interface {
+	Recv() (*RequestDataResponse, error)
+	grpc.ClientStream
+}
+
+type storageGetTailDataClient struct {
+	grpc.ClientStream
+}
+
+func (x *storageGetTailDataClient) Recv() (*RequestDataResponse, error) {
+	m := new(RequestDataResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // StorageServer is the server API for Storage service.
 // All implementations must embed UnimplementedStorageServer
 // for forward compatibility
@@ -76,6 +109,7 @@ type StorageServer interface {
 	Write(context.Context, *WriteRequest) (*OkResponse, error)
 	Processed(context.Context, *ProcessedRequest) (*OkResponse, error)
 	Persist(context.Context, *ProcessedRequest) (*OkResponse, error)
+	GetTailData(*RequestData, Storage_GetTailDataServer) error
 	mustEmbedUnimplementedStorageServer()
 }
 
@@ -94,6 +128,9 @@ func (UnimplementedStorageServer) Processed(context.Context, *ProcessedRequest) 
 }
 func (UnimplementedStorageServer) Persist(context.Context, *ProcessedRequest) (*OkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Persist not implemented")
+}
+func (UnimplementedStorageServer) GetTailData(*RequestData, Storage_GetTailDataServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetTailData not implemented")
 }
 func (UnimplementedStorageServer) mustEmbedUnimplementedStorageServer() {}
 
@@ -180,6 +217,27 @@ func _Storage_Persist_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Storage_GetTailData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RequestData)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(StorageServer).GetTailData(m, &storageGetTailDataServer{stream})
+}
+
+type Storage_GetTailDataServer interface {
+	Send(*RequestDataResponse) error
+	grpc.ServerStream
+}
+
+type storageGetTailDataServer struct {
+	grpc.ServerStream
+}
+
+func (x *storageGetTailDataServer) Send(m *RequestDataResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Storage_ServiceDesc is the grpc.ServiceDesc for Storage service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -204,6 +262,12 @@ var Storage_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Storage_Persist_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetTailData",
+			Handler:       _Storage_GetTailData_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "protos/storage.proto",
 }
