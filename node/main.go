@@ -15,38 +15,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-type MyStorageClient struct {
-	client protos.StorageClient
-}
-
-func NewSpecialStorageClient(conn grpc.ClientConnInterface) MyStorageClient {
-	return MyStorageClient{client: protos.NewStorageClient(conn)}
-}
-
-func (c MyStorageClient) GetTailData(ctx context.Context, ca *cache.Cache) error {
-	log.Println("do you even get called?")
-	stream, err := c.client.GetTailData(context.Background(), &protos.RequestData{})
-	if err != nil {
-		log.Fatalf("Error getting the tail data - %v", err.Error())
-	}
-	for {
-		log.Println("Running client loop")
-		item, err := stream.Recv()
-		if err == io.EOF {
-			log.Println("Received all data from the tail")
-			break
-		} else if err != nil {
-			log.Fatalf("Error receiving key data from tail whilst getting data - %v", err.Error())
-		}
-		// Add the key value pair to the cache locally.
-		log.Printf("Writing %s: %s", item.Key, item.Value)
-		ca.Set(item.Key, item.Value, cache.NoExpiration)
-	}
-	log.Println("bye")
-
-	return nil
-}
-
 func main() {
 	// Determine port number
 	port, err := strconv.Atoi(os.Getenv("port"))
@@ -55,7 +23,7 @@ func main() {
 	}
 
 	// Create GRPC client
-	masterConn, err := grpc.Dial("master:6000", grpc.WithInsecure())
+	masterConn, err := grpc.Dial(os.Getenv("host"), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to the master - %v", err.Error())
 	}
@@ -82,23 +50,37 @@ func main() {
 		log.Printf("Fetched current chain tail - %v", tailAddress)
 
 		if tailAddress != "" {
-			// STREAM THE DATA
+			//
 			tailConn, err := grpc.Dial(response.Address, grpc.WithInsecure())
 			if err != nil {
 				log.Fatalf("Error connecting to the tail to grab the data - %v", err.Error())
 			}
 			defer tailConn.Close()
 
-			// Create Chain client
-			// tailClient := protos.NewStorageClient(tailConn)
+			// Create Storage client
+			tailClient := protos.NewStorageClient(tailConn)
 
-			tailClient := NewSpecialStorageClient(tailConn)
-			_ = tailClient.GetTailData(context.Background(), c)
-
+			// Stream the data
+			stream, err := tailClient.GetTailData(context.Background(), &protos.RequestData{})
+			if err != nil {
+				log.Fatalf("Error getting the tail data - %v", err.Error())
+			}
+			for {
+				log.Println("Running client loop")
+				item, err := stream.Recv()
+				if err == io.EOF {
+					log.Println("Received all data from the tail")
+					break
+				} else if err != nil {
+					log.Fatalf("Error receiving key data from tail whilst getting data - %v", err.Error())
+				}
+				// Add the key value pair to the cache locally.
+				log.Printf("Writing %s: %s", item.Key, item.Value)
+				c.Set(item.Key, item.Value, cache.NoExpiration)
+			}
 		}
 
-		// JOIN
-
+		// Join the chain
 		request := &protos.JoinRequest{
 			Address:     os.Getenv("address"),
 			TailAddress: tailAddress,
@@ -159,5 +141,4 @@ func sendHealthCheck(healthClient protos.HealthClient) {
 		}
 		//log.Printf("Sent health check to master - status: %v", response.Status)
 	}
-
 }

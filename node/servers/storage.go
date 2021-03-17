@@ -3,6 +3,7 @@ package servers
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/JDJFisher/distributed-storage/protos"
 	"github.com/patrickmn/go-cache"
@@ -50,7 +51,7 @@ func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*p
 
 	// Determine host based on if tail
 	if s.Neighbours.SuccAddress == "" {
-		grpcHost = "master:6000"
+		grpcHost = os.Getenv("host")
 	} else {
 		grpcHost = s.Neighbours.SuccAddress
 	}

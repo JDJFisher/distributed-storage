@@ -11,15 +11,9 @@ import (
 )
 
 func main() {
-	// Different grpc connection info depending on if it's running in docker or not
-	grpcHost := ":6000"
-	if os.Getenv("docker") == "true" {
-		grpcHost = "master" + grpcHost
-	}
-
 	// Open a connection to the master service
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(grpcHost, grpc.WithInsecure())
+	conn, err := grpc.Dial(os.Getenv("host"), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to the master - %v", err.Error())
 	}
@@ -44,12 +38,10 @@ func fake(storageClient protos.StorageClient) {
 		&protos.ReadRequest{Key: "beta"},
 	}
 
-	time.Sleep(2 * time.Second)
-
 	// Loop over dummy requests
 	for i, request := range dummyRequests {
 		// Wait ...
-		// time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 
 		switch request := request.(type) {
 		// Panic

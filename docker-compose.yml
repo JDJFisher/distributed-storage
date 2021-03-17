@@ -11,7 +11,7 @@ services:
         networks:
             - external
         environment:
-            - docker=true
+            - host=master:6000
 
     master:
         build:
@@ -24,8 +24,6 @@ services:
             - external
         ports:
             - 6000:6000
-        environment:
-            - docker=true
 
     node-0:
         build:
@@ -40,8 +38,8 @@ services:
         ports:
             - 7000:7000
         environment:
-            - docker=true
             - port=7000
+            - host=master:6000
             - address=node-0:7000
 
     node-1:
@@ -57,8 +55,8 @@ services:
         ports:
             - 7001:7001
         environment:
-            - docker=true
             - port=7001
+            - host=master:6000
             - address=node-1:7001
 
     node-2:
@@ -74,8 +72,8 @@ services:
         ports:
             - 7002:7002
         environment:
-            - docker=true
             - port=7002
+            - host=master:6000
             - address=node-2:7002
 
 networks:
