@@ -65,8 +65,8 @@ func main() {
 			if err != nil {
 				log.Fatalf("Error getting the tail data - %v", err.Error())
 			}
+
 			for {
-				log.Println("Running client loop")
 				item, err := stream.Recv()
 				if err == io.EOF {
 					log.Println("Received all data from the tail")
@@ -74,6 +74,7 @@ func main() {
 				} else if err != nil {
 					log.Fatalf("Error receiving key data from tail whilst getting data - %v", err.Error())
 				}
+
 				// Add the key value pair to the cache locally.
 				log.Printf("Writing %s: %s", item.Key, item.Value)
 				c.Set(item.Key, item.Value, cache.NoExpiration)
