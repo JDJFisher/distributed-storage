@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/JDJFisher/distributed-storage/protos"
@@ -11,13 +12,19 @@ import (
 )
 
 func main() {
-	// Collect args from the environment
-	key := os.Getenv("KEY")
-	value := os.Getenv("VALUE")
+	log.SetOutput(os.Stdout)
+	args := os.Args[1:]
 
-	// Exit if no key was specified
-	if key == "" {
+	if len(args) < 2 {
+		log.Println("Too few args")
 		return
+	}
+
+	op := args[0]
+	key := args[1]
+	value := ""
+	if len(args) >= 3 {
+		value = args[2]
 	}
 
 	// Open a connection to the master service
@@ -32,15 +39,18 @@ func main() {
 	client := protos.NewStorageClient(conn)
 
 	// Send a request
-	if value != "" {
-		sendWriteRequest(client, &protos.WriteRequest{Key: key, Value: value})
-	} else {
+	switch strings.ToUpper(op) {
+	case "READ":
 		sendReadRequest(client, &protos.ReadRequest{Key: key})
+	case "WRITE":
+		sendWriteRequest(client, &protos.WriteRequest{Key: key, Value: value})
+	default:
+		log.Println("Invalid operation: ", op)
 	}
 }
 
 func sendReadRequest(client protos.StorageClient, request *protos.ReadRequest) {
-	log.Println("Dispatching read:", request.Key)
+	log.Println("Requesting read:", request.Key)
 
 	response, err := client.Read(context.Background(), request)
 
@@ -48,13 +58,17 @@ func sendReadRequest(client protos.StorageClient, request *protos.ReadRequest) {
 		log.Fatalln("Failed read:", err.Error())
 	} else if response.Value == "" {
 		log.Println("Recieved empty value")
-	} else if response.Value == "" {
+	} else {
 		log.Println("Recieved value:", response.Value)
 	}
 }
 
 func sendWriteRequest(client protos.StorageClient, request *protos.WriteRequest) {
-	log.Printf("Dispatching write: %v->%v", request.Key, request.Value)
+	if request.Value == "" {
+		log.Printf("Requesting empty write: %v", request.Key)
+	} else {
+		log.Printf("Requesting write: %v->%v", request.Key, request.Value)
+	}
 
 	_, err := client.Write(context.Background(), request)
 

@@ -1,7 +1,8 @@
 
 # Build the images
+SERVICE=""
 build:
-	docker-compose build
+	docker-compose build $(SERVICE)
 
 
 # Run the chain services
@@ -11,7 +12,7 @@ serve:
 
 # Execute a request on the chain
 request:
-	docker-compose run --rm -e KEY=$(KEY) -e VALUE=$(VALUE) client
+	docker-compose run --rm -e OP=$(OP) -e KEY=$(KEY) -e VALUE=$(VALUE) client
 
 
 # Regenerate all the proto files

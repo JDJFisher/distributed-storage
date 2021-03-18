@@ -21,4 +21,4 @@ RUN go build ./client/main.go
 FROM golang:1.15-alpine
 COPY --from=build /app/main main
 RUN ["chmod", "+x", "./main"]
-CMD ["./main"]
+CMD ["sh", "-c", "./main ${OP} ${KEY} ${VALUE}"]
