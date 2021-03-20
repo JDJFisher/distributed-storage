@@ -62,6 +62,7 @@ func main() {
 	addKV2 := runCommand("make request OP=write KEY=test VALUE=hello")
 	checkKeyValueWrite(addKV2, "test", "hello")
 
+	//Test 5
 	addKV3 := runCommand("make request OP=write KEY=chain VALUE=replication")
 	checkKeyValueWrite(addKV3, "chain", "replication")
 
@@ -70,6 +71,17 @@ func main() {
 	time.Sleep(2 * time.Second)
 	readKV2 := runCommand("make request OP=read KEY=chain")
 	checkKeyValueRead(readKV2, "replication")
+
+	//Test 6
+	//Start the node again and check that the new tail has the data
+	_ = runCommand("docker-compose start node-0")
+	time.Sleep(1 * time.Second)
+
+	readKV3 := runCommand("make request OP=read KEY=test")
+	checkKeyValueRead(readKV3, "hello")
+
+	readKV4 := runCommand("make request OP=read KEY=chain")
+	checkKeyValueRead(readKV4, "replication")
 
 	fmt.Println("All tests successful!")
 }
