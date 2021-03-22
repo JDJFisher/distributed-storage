@@ -24,3 +24,8 @@ proto:
 # Delete generated grpc sources
 clean:
 	rm -f protos/*.pb.go
+
+
+#Run tests for all of the code
+test:
+	go test -v ./...
