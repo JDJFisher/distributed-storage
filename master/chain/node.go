@@ -54,7 +54,6 @@ func (node *Node) SetSucc(newSucc *Node) {
 	node.successor = newSucc
 }
 
-// TODO - Make this method progressively go up the predecessors / successors until it finds one that is alive to udpate to (for loop on the rpc request probably)
 // UpdateNeighbours - Tell a node about it's neighbour nodes changingerror
 func (node *Node) UpdateNeighbours(predAddress string, succAddress string) error {
 	// Open a connection to the predecessor node

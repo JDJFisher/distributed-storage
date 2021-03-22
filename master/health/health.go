@@ -24,7 +24,6 @@ func NewHealthServer(chain *chain.Chain) *HealthServer {
 // Alive (Node -> Master) - Health check ping coming from the node
 func (s *HealthServer) Alive(ctx context.Context, req *protos.HealthCheckRequest) (*protos.HealthCheckResponse, error) {
 	// log.Printf("Received health check from: %s", req.Address)
-	// TODO: check if we actually care about this node, if we dont reply the node should kill itself or try to rejoin the chain
 	s.Lock()
 	defer s.Unlock()
 

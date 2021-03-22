@@ -79,8 +79,6 @@ func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*p
 			log.Fatalf("Error ... to the master - %v", err.Error())
 		}
 
-		// TODO: Append to queue
-
 	} else {
 		// Propagate the write request down the chain
 		_, err = storageClient.Write(context.Background(), req)
@@ -110,8 +108,6 @@ func (s *StorageServer) Persist(ctx context.Context, req *protos.ProcessedReques
 }
 
 func (s *StorageServer) GetTailData(req *protos.RequestData, stream protos.Storage_GetTailDataServer) error {
-	// TODO: Clear the queue
-
 	for k, v := range s.Cache.Items() {
 		log.Printf("Sending %s: %s to the new node", k, v.Object.(string))
 		data := &protos.RequestDataResponse{Key: k, Value: v.Object.(string)}

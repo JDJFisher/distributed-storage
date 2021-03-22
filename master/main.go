@@ -14,8 +14,6 @@ import (
 
 func main() {
 	serve(6000)
-
-	// TODO: Start assigning candidate nodes a role to build a chain
 }
 
 func serve(port int) {
