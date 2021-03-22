@@ -137,6 +137,25 @@ func TestBatchDataTransfer(t *testing.T) {
 	assert.Contains(t, readKV, "Recieved value: hello", "Incorrect value read from the chain for key=test. (after new tail batch transfer)")
 }
 
+func TestOneNodeSystem(t *testing.T) {
+	//Testing whether the system works with only 1 node
+	_ = runCommand("docker-compose kill node-1")
+	_ = runCommand("docker-compose kill node-2")
+	time.Sleep(3 * time.Second)
+
+	readKV := runCommand("docker-compose run --rm -e OP=read -e KEY=test -e VALUE= client")
+	assert.Contains(t, readKV, "Requesting read: test", "Error reading the value from key=test from one node system")
+	assert.Contains(t, readKV, "Recieved value: hello", "Incorrect value read from the chain for key=test. (one node system)")
+
+	writeKV := runCommand("docker-compose run --rm -e OP=write -e KEY=one -e VALUE=two client")
+	assert.Contains(t, writeKV, "Requesting write: one->two", "Error creating write request for key=test, value=hello")
+	assert.Contains(t, writeKV, "Write persisted", "Error overwriting the key=test with value=hello")
+
+	readKV2 := runCommand("docker-compose run --rm -e OP=read -e KEY=one -e VALUE= client")
+	assert.Contains(t, readKV2, "Requesting read: one", "Error reading the value from key=one from one node system")
+	assert.Contains(t, readKV2, "Recieved value: two", "Incorrect value read from the chain for key=one. (one node system)")
+}
+
 func runCommand(cmd string) string {
 	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
 	if err != nil {
