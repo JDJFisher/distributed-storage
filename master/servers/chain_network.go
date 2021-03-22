@@ -10,7 +10,6 @@ import (
 	"github.com/JDJFisher/distributed-storage/protos"
 )
 
-// ChainServer ...
 type ChainServer struct {
 	protos.UnimplementedChainServer
 	Chain       *chain.Chain
@@ -21,7 +20,6 @@ func NewChainServer(chain *chain.Chain) *ChainServer {
 	return &ChainServer{Chain: chain}
 }
 
-// GetTail ...
 func (s *ChainServer) GetTail(ctx context.Context, req *protos.TailRequest) (*protos.TailResponse, error) {
 	if s.IsExtending {
 		return nil, errors.New("Chain is extending")
@@ -41,7 +39,7 @@ func (s *ChainServer) Join(ctx context.Context, req *protos.JoinRequest) (*proto
 	s.Chain.Lock()
 	defer s.Chain.Unlock()
 
-	// Verify tail address is correct
+	// Verify the tail address is correct
 	if req.TailAddress != s.Chain.GetTailAddress() {
 		return nil, errors.New("Whoops")
 	}
@@ -52,10 +50,7 @@ func (s *ChainServer) Join(ctx context.Context, req *protos.JoinRequest) (*proto
 		return nil, err
 	}
 
-	_, err := s.Chain.AddNode(req.Address)
-	if err != nil {
-		//
-	}
+	s.Chain.AddNode(req.Address)
 	s.Chain.Print()
 
 	s.IsExtending = false

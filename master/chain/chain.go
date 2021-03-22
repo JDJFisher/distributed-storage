@@ -32,14 +32,14 @@ func (chain *Chain) Print() {
 	}
 	fmt.Printf("(TAIL)\n")
 
-	fmt.Println("---------[ Neighbour Info ]----------")
-	for _, node := range chain.Nodes {
-		fmt.Printf("%v|%v|%v\n", node.GetPredAddress(), node.Address, node.GetSuccAddress())
-	}
-	fmt.Println("-------------------")
+	// fmt.Println("---------[ Neighbour Info ]----------")
+	// for _, node := range chain.Nodes {
+	// 	fmt.Printf("%v|%v|%v\n", node.GetPredAddress(), node.Address, node.GetSuccAddress())
+	// }
+	// fmt.Println("-------------------")
 }
 
-// GetHead -
+// GetHead - Retrieve the head node
 func (chain *Chain) GetHead() *Node {
 	if chain.Len() >= 1 {
 		return chain.Nodes[0]
@@ -47,7 +47,7 @@ func (chain *Chain) GetHead() *Node {
 	return nil
 }
 
-// GetHeadAddress -
+// GetHeadAddress - Get the address of the head node
 func (chain *Chain) GetHeadAddress() string {
 	head := chain.GetHead()
 	if head != nil {
@@ -56,7 +56,7 @@ func (chain *Chain) GetHeadAddress() string {
 	return ""
 }
 
-// GetTail -
+// GetTail - Retrieve the tail node
 func (chain *Chain) GetTail() *Node {
 	l := len(chain.Nodes)
 	if l > 0 {
@@ -65,7 +65,7 @@ func (chain *Chain) GetTail() *Node {
 	return nil
 }
 
-// GetTailAddress -
+// GetTailAddress - Get the address of the tail node
 func (chain *Chain) GetTailAddress() string {
 	tail := chain.GetTail()
 	if tail != nil {
@@ -74,7 +74,7 @@ func (chain *Chain) GetTailAddress() string {
 	return ""
 }
 
-// GetNodeIndex - ...
+// GetNodeIndex - Get the position of a node in the chain
 func (chain *Chain) GetNodeIndex(address string) int {
 	for i, node := range chain.Nodes {
 		if node.Address == address {
@@ -84,7 +84,7 @@ func (chain *Chain) GetNodeIndex(address string) int {
 	return -1
 }
 
-// GetNode - ...
+// GetNode - Retrieve a node from the chain
 func (chain *Chain) GetNode(address string) *Node {
 	for _, node := range chain.Nodes {
 		if node.Address == address {
@@ -94,11 +94,13 @@ func (chain *Chain) GetNode(address string) *Node {
 	return nil
 }
 
-// AddNode - ...
+// AddNode - Add a node to the chain structure
 func (chain *Chain) AddNode(address string) (*Node, error) {
+	// Prepare
 	tail := chain.GetTail()
 	node := NewNode(address, tail, nil)
 
+	// Inform the current tail of the new assignment
 	if tail != nil {
 		tail.SetSucc(node)
 		err := tail.UpdateNeighbours(tail.GetPredAddress(), address)
@@ -107,11 +109,12 @@ func (chain *Chain) AddNode(address string) (*Node, error) {
 		}
 	}
 
+	// Update chain structure
 	chain.Nodes = append(chain.Nodes, node)
 	return node, nil
 }
 
-// RemoveNode - ...
+// RemoveNode - Remove a node from the chain by its address
 func (chain *Chain) RemoveNode(address string) {
 	i := chain.GetNodeIndex(address)
 	if i != -1 {

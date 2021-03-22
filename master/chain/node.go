@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// Node - A server in the chain (either a head, replica or tail)
+// Node - A server in the chain
 type Node struct {
 	Address     string
 	predecessor *Node
@@ -20,7 +20,7 @@ func NewNode(address string, predecessor *Node, successor *Node) *Node {
 	return &Node{address, predecessor, successor}
 }
 
-//Predecessor stuff
+// Predecessor accessors
 
 func (node *Node) GetPred() *Node {
 	return node.predecessor
@@ -37,7 +37,7 @@ func (node *Node) SetPred(newPred *Node) {
 	node.predecessor = newPred
 }
 
-//Successor stuff
+// Successor accessors
 
 func (node *Node) GetSucc() *Node {
 	return node.successor

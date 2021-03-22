@@ -92,16 +92,13 @@ func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*p
 
 //
 func (s *StorageServer) Persist(ctx context.Context, req *protos.ProcessedRequest) (*protos.OkResponse, error) {
-	//
 	uid, _ := uuid.FromString(req.Uuid)
 
-	//
 	r := s.Staging[uid]
 
 	// Persist the write to the replica
 	s.Cache.Set(r.Key, r.Value, cache.NoExpiration)
 
-	//
 	delete(s.Staging, uid)
 
 	return &protos.OkResponse{}, nil

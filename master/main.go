@@ -26,7 +26,7 @@ func serve(port int) {
 	// Create a GRPC server
 	grpcServer := grpc.NewServer()
 
-	//Create a new chain
+	// Create a new chain
 	chain := chain.NewChain()
 
 	// Register Chain service
@@ -37,11 +37,11 @@ func serve(port int) {
 	storageServer := servers.NewStorageServer(chain)
 	protos.RegisterStorageServer(grpcServer, storageServer)
 
-	//Register a health checking server - uses a new() func to initialize the map
+	// Register a health checking server - uses a new() func to initialize the map
 	healthServer := health.NewHealthServer(chain)
 	protos.RegisterHealthServer(grpcServer, healthServer)
 
-	//Check the status of nodes every 5 seconds
+	// Check the status of nodes every 5 seconds
 	go healthServer.CheckNodes(2)
 
 	// Start serving GRPC requests on the open tcp connection

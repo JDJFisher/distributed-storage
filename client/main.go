@@ -13,13 +13,13 @@ import (
 
 func main() {
 	log.SetOutput(os.Stdout)
-	args := os.Args[1:]
 
+	// Parse command args
+	args := os.Args[1:]
 	if len(args) < 2 {
 		log.Println("Too few args")
 		return
 	}
-
 	op := args[0]
 	key := args[1]
 	value := ""
@@ -38,7 +38,7 @@ func main() {
 	// Create storage client
 	client := protos.NewStorageClient(conn)
 
-	// Send a request
+	// Make a request
 	switch strings.ToUpper(op) {
 	case "READ":
 		sendReadRequest(client, &protos.ReadRequest{Key: key})
@@ -52,8 +52,10 @@ func main() {
 func sendReadRequest(client protos.StorageClient, request *protos.ReadRequest) {
 	log.Println("Requesting read:", request.Key)
 
+	// Execute
 	response, err := client.Read(context.Background(), request)
 
+	// Display response
 	if err != nil {
 		log.Fatalln("Failed read:", err.Error())
 	} else if response.Value == "" {
@@ -70,8 +72,10 @@ func sendWriteRequest(client protos.StorageClient, request *protos.WriteRequest)
 		log.Printf("Requesting write: %v->%v", request.Key, request.Value)
 	}
 
+	// Execute
 	_, err := client.Write(context.Background(), request)
 
+	// Display response
 	if err != nil {
 		log.Fatalln("Failed write:", err.Error())
 	} else {

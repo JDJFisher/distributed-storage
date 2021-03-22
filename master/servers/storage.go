@@ -12,7 +12,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-// StorageServer ...
 type StorageServer struct {
 	protos.UnimplementedStorageServer
 	Chain *chain.Chain
@@ -76,10 +75,8 @@ func (s *StorageServer) Write(ctx context.Context, req *protos.WriteRequest) (*p
 		log.Fatalf("Error forwarding write request to the head node - %v", err.Error())
 	}
 
-	//
 	start := time.Now()
 
-	//
 	for s.Chain.IsInPending(uid) {
 		if time.Since(start) > 5*time.Second {
 			return nil, fmt.Errorf("timeout")
@@ -95,7 +92,7 @@ func (s *StorageServer) Processed(ctx context.Context, req *protos.ProcessedRequ
 		panic("big issues")
 	}
 
-	// Tell the bois
+	// Tell the nodes that the operation can be persisted
 	for _, node := range s.Chain.Nodes {
 
 		// Open a connection to the node
@@ -119,11 +116,3 @@ func (s *StorageServer) Processed(ctx context.Context, req *protos.ProcessedRequ
 
 	return &protos.OkResponse{}, nil
 }
-
-// timout response
-// Wait for the tail to reply
-// Send to the head (head does the processing)
-// Head forwards it down the chain until the tail adding it to the sent in each node
-// Tail replies to the master with the uuid that got propogated
-// Master removes from its local pending and tells each node to remove from sent and add to the history
-// Master responds to the client

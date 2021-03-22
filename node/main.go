@@ -50,7 +50,7 @@ func main() {
 		log.Printf("Fetched current chain tail - %v", tailAddress)
 
 		if tailAddress != "" {
-			//
+			// Connect to the current tail node
 			tailConn, err := grpc.Dial(response.Address, grpc.WithInsecure())
 			if err != nil {
 				log.Fatalf("Error connecting to the tail to grab the data - %v", err.Error())
