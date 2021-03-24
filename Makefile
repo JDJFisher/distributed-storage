@@ -1,8 +1,7 @@
 
 # Build the images
-SERVICE=""
 build:
-	docker-compose build $(SERVICE)
+	docker-compose build
 
 
 # Run the chain services

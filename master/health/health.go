@@ -3,6 +3,7 @@ package health
 import (
 	"context"
 	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -52,6 +53,12 @@ func (s *HealthServer) CheckNodes(interval uint8) {
 				log.Printf("Removing node %v from the chain", address)
 				s.chain.RemoveNode(address)
 			}
+		}
+
+		// Terminate is the chain is empty
+		if s.chain.Len() == 0 {
+			log.Fatalln("All nodes are dead, chain compromised, terminating.")
+			os.Exit(1)
 		}
 
 		// Attempt to fix the chain after node removal
