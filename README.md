@@ -35,9 +35,9 @@ The system is made to be dependable and therefore supports a many-node chain. No
 
 -   GNU Make
 
--   Docker - Latest version tested
+-   Docker
 
--   Docker Compose - Latest version tested
+-   Docker Compose (1.28.5+)
 
 ## Tests
 
