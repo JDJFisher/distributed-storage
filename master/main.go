@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net"
+	"os"
 	"strconv"
 
 	"github.com/JDJFisher/distributed-storage/master/chain"
@@ -13,7 +14,14 @@ import (
 )
 
 func main() {
-	serve(6000)
+	// Determine port number
+	port, err := strconv.Atoi(os.Getenv("port"))
+	if err != nil {
+		port = 6000
+	}
+
+	// Go
+	serve(port)
 }
 
 func serve(port int) {
