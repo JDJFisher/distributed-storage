@@ -140,8 +140,9 @@ func TestBatchDataTransfer(t *testing.T) {
 func TestOneNodeSystem(t *testing.T) {
 	//Testing whether the system works with only 1 node
 	_ = runCommand("docker-compose kill node-1")
+	time.Sleep(4 * time.Second)
 	_ = runCommand("docker-compose kill node-2")
-	time.Sleep(6 * time.Second)
+	time.Sleep(4 * time.Second)
 
 	readKV := runCommand("docker-compose run --rm -e OP=read -e KEY=test -e VALUE= client")
 	assert.Contains(t, readKV, "Requesting read: test", "Error reading the value from key=test from one node system")
