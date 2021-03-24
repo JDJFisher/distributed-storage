@@ -13,10 +13,10 @@ import (
 func TestSystemAlive(t *testing.T) {
 	//Make sure all of the expected containers are alive and running so we cant test properly
 	dockerContainers := string(runCommand("docker container ls"))
-	assert.Contains(t, dockerContainers, "distributed-storage_master", "Master service is not alive  - restart the system and try again")
-	assert.Contains(t, dockerContainers, "distributed-storage_node-0", "Node 0 is not alive  - restart the system and try again")
-	assert.Contains(t, dockerContainers, "distributed-storage_node-1", "Node 1 is not alive  - restart the system and try again")
-	assert.Contains(t, dockerContainers, "distributed-storage_node-2", "Node 2 is not alive  - restart the system and try again")
+	assert.Contains(t, dockerContainers, "master", "Master service is not alive  - restart the system and try again")
+	assert.Contains(t, dockerContainers, "node-0", "Node 0 is not alive  - restart the system and try again")
+	assert.Contains(t, dockerContainers, "node-1", "Node 1 is not alive  - restart the system and try again")
+	assert.Contains(t, dockerContainers, "node-2", "Node 2 is not alive  - restart the system and try again")
 }
 
 func TestNeighbours(t *testing.T) {
@@ -40,7 +40,7 @@ func TestNodeKill(t *testing.T) {
 
 	//Make sure the node isnt alive (docker wise)
 	dockerContainers := string(runCommand("docker container ls"))
-	assert.NotContains(t, dockerContainers, "distributed-storage_node-0", "Node 0 is still alive after being killed")
+	assert.NotContains(t, dockerContainers, "node-0", "Node 0 is still alive after being killed")
 
 	//Make sure the node is not alive for the chain
 	time.Sleep(4 * time.Second)
@@ -55,7 +55,7 @@ func TestNodeStart(t *testing.T) {
 	_ = runCommand("docker-compose start node-0")
 	time.Sleep(2 * time.Second)
 	dockerContainers := string(runCommand("docker container ls"))
-	assert.Contains(t, dockerContainers, "distributed-storage_node-0", "Node 0 is not alive, even after being restarted")
+	assert.Contains(t, dockerContainers, "node-0", "Node 0 is not alive, even after being restarted")
 
 	time.Sleep(3 * time.Second)
 	masterState := runCommand("docker-compose logs --no-log-prefix master | tail -5")
@@ -141,7 +141,7 @@ func TestOneNodeSystem(t *testing.T) {
 	//Testing whether the system works with only 1 node
 	_ = runCommand("docker-compose kill node-1")
 	_ = runCommand("docker-compose kill node-2")
-	time.Sleep(4 * time.Second)
+	time.Sleep(6 * time.Second)
 
 	readKV := runCommand("docker-compose run --rm -e OP=read -e KEY=test -e VALUE= client")
 	assert.Contains(t, readKV, "Requesting read: test", "Error reading the value from key=test from one node system")
