@@ -43,7 +43,7 @@ func TestNodeKill(t *testing.T) {
 	assert.NotContains(t, dockerContainers, "distributed-storage_node-0", "Node 0 is still alive after being killed")
 
 	//Make sure the node is not alive for the chain
-	time.Sleep(3 * time.Second)
+	time.Sleep(4 * time.Second)
 	masterState := runCommand("docker-compose logs --no-log-prefix master | tail -4")
 	splitLines := strings.Split(masterState, "\n")
 	assert.Contains(t, splitLines[0], "Neighbour Info", "Incorrect neighbour info used")
@@ -53,11 +53,11 @@ func TestNodeKill(t *testing.T) {
 
 func TestNodeStart(t *testing.T) {
 	_ = runCommand("docker-compose start node-0")
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 	dockerContainers := string(runCommand("docker container ls"))
 	assert.Contains(t, dockerContainers, "distributed-storage_node-0", "Node 0 is not alive, even after being restarted")
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(3 * time.Second)
 	masterState := runCommand("docker-compose logs --no-log-prefix master | tail -5")
 	splitLines := strings.Split(masterState, "\n")
 	assert.Contains(t, splitLines[0], "Neighbour Info", "Incorrect neighbour info used")
@@ -118,7 +118,7 @@ func TestReadRequestOverwrite(t *testing.T) {
 func TestReadAfterTailKill(t *testing.T) {
 	//Kill the tail and then check that we can still read (from the middle chain node now)
 	_ = runCommand("docker-compose kill node-0")
-	time.Sleep(2 * time.Second)
+	time.Sleep(3 * time.Second)
 
 	readKV := runCommand("docker-compose run --rm -e OP=read -e KEY=test -e VALUE= client")
 
@@ -129,7 +129,7 @@ func TestReadAfterTailKill(t *testing.T) {
 func TestBatchDataTransfer(t *testing.T) {
 	//Kill the tail and then check that we can still read (from the middle chain node now)
 	_ = runCommand("docker-compose start node-0")
-	time.Sleep(2 * time.Second)
+	time.Sleep(3 * time.Second)
 
 	readKV := runCommand("docker-compose run --rm -e OP=read -e KEY=test -e VALUE= client")
 
@@ -141,7 +141,7 @@ func TestOneNodeSystem(t *testing.T) {
 	//Testing whether the system works with only 1 node
 	_ = runCommand("docker-compose kill node-1")
 	_ = runCommand("docker-compose kill node-2")
-	time.Sleep(3 * time.Second)
+	time.Sleep(4 * time.Second)
 
 	readKV := runCommand("docker-compose run --rm -e OP=read -e KEY=test -e VALUE= client")
 	assert.Contains(t, readKV, "Requesting read: test", "Error reading the value from key=test from one node system")
