@@ -32,11 +32,11 @@ func (chain *Chain) Print() {
 	}
 	fmt.Printf("(TAIL)\n")
 
-	// fmt.Println("---------[ Neighbour Info ]----------")
-	// for _, node := range chain.Nodes {
-	// 	fmt.Printf("%v|%v|%v\n", node.GetPredAddress(), node.Address, node.GetSuccAddress())
-	// }
-	// fmt.Println("-------------------")
+	fmt.Println("---------[ Neighbour Info ]----------")
+	for _, node := range chain.Nodes {
+		fmt.Printf("%v|%v|%v\n", node.GetPredAddress(), node.Address, node.GetSuccAddress())
+	}
+	fmt.Println("-------------------")
 }
 
 // GetHead - Retrieve the head node
